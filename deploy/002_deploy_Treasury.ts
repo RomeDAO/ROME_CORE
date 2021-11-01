@@ -19,9 +19,9 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
     frax = '0x1A93B23281CC1CDE4C4741353F3064709A16197d';
 
-    mim = '0x0cae51e1032e8461f4806e26332c030e34de3adb';
+    mim = '0x0caE51e1032e8461f4806e26332c030E34De3aDb';
 
-    wmovr = '0x98878b06940ae243284ca214f92bb71a2b032b8a';
+    wmovr = '0x98878B06940aE243284CA214f92Bb71a2b032B8A';
 
     solarFactory = await ethers.getContractAt(abi,'0x049581aEB6Fe262727f290165C29BDAB065a1B68');
 

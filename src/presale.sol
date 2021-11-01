@@ -1,11 +1,8 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: GPL-3.0
 pragma solidity 0.7.5;
 
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
-
+import './Libraries/Ownable.sol';
+import './Libraries/SafeERC20.sol';
 
 contract RomePresale is Ownable {
     using SafeERC20 for IERC20;
@@ -56,9 +53,9 @@ contract RomePresale is Ownable {
         address _DAO
     ) {
         require( _sROME != address(0) );
-        ROME = IERC(_sROME);
+        sROME = IERC20(_sROME);
         require( _DAI != address(0) );
-        DAI = IERC(_DAI);
+        DAI = IERC20(_DAI);
         require( _DAO != address(0) );
         DAO = _DAO;
     }
@@ -73,11 +70,11 @@ contract RomePresale is Ownable {
 
     /**
      *  @notice adds multiple whitelist to the sale
-     *  @param _address: dynamic array of addresses to whitelist
+     *  @param _addresses: dynamic array of addresses to whitelist
      */
     function addMultipleWhitelist(address[] calldata _addresses) external onlyOwner {
         for (uint i = 0; i < _addresses.length; i++) {
-            whitelisted[_addressess[i]] = true;
+            whitelisted[_addresses[i]] = true;
         }
     }
 
@@ -121,7 +118,7 @@ contract RomePresale is Ownable {
      */
     function AdminWithdraw(address _token, uint256 _amount) external onlyOwner {
         IERC20( _token ).safeTransfer( DAO, _amount );
-        emit AdminWithdrawal(_Token, _amount, DAO);
+        emit AdminWithdrawal(_token, _amount, DAO);
     }
 
     /**
@@ -133,14 +130,14 @@ contract RomePresale is Ownable {
         require(!ended, 'Sale has ended');
         require(whitelisted[msg.sender] == true, 'msg.sender is not whitelisted');
 
-        UserInfo storage userInfo = userInfo[msg.sender];
+        UserInfo storage user = userInfo[msg.sender];
 
         require(
-            cap >= userInfo.amount.add(_amount),
+            cap >= user.amount.add(_amount),
             'new amount above user limit'
             );
 
-        userInfo.amount = userInfo.amount.add(_amount);
+        user.amount = user.amount.add(_amount);
         totalRaised = totalRaised.add(_amount);
 
         DAI.safeTransferFrom( msg.sender, DAO, _amount );
@@ -158,15 +155,15 @@ contract RomePresale is Ownable {
         require(claimable, 'sROME is not yet claimable');
         require(whitelisted[msg.sender] == true, 'msg.sender is not whitelisted');
 
-        UserInfo storage userInfo = userInfo[msg.sender];
+        UserInfo storage user = userInfo[msg.sender];
 
-        require(userInfo.payout > 0, 'msg.sender has not participated');
-        require(!userInfo.claimed, 'msg.sender has already claimed')
+        require(user.payout > 0, 'msg.sender has not participated');
+        require(!user.claimed, 'msg.sender has already claimed');
 
-        userInfo.claimed = true;
+        user.claimed = true;
 
-        uint256 payout = userInfo.payout;
-        userInfo.payout = 0;
+        uint256 payout = user.payout;
+        user.payout = 0;
         totalDebt = totalDebt.sub(payout);
 
         sROME.safeTransfer( msg.sender, payout );

@@ -754,7 +754,7 @@ contract StablesBondDepository is Ownable {
             require( _input <= 1000, "Payout cannot be above 1 percent" );
             terms.maxPayout = _input;
         } else if ( _parameter == PARAMETER.FEE ) { // 2
-            require( _input <= 10000, "DAO fee cannot exceed payout" );
+            require( _input <= 10000, "WARCHEST fee cannot exceed payout" );
             terms.fee = _input;
         } else if ( _parameter == PARAMETER.DEBT ) { // 3
             terms.maxDebt = _input;
@@ -848,7 +848,7 @@ contract StablesBondDepository is Ownable {
         IERC20( principle ).approve( address( treasury ), _amount );
         ITreasury( treasury ).deposit( _amount, principle, profit );
         
-        if ( fee != 0 ) { // fee is transferred to dao 
+        if ( fee != 0 ) { // fee is transferred to WARCHEST
             IERC20( ROME ).safeTransfer( WARCHEST, fee );
         }
         
@@ -1104,13 +1104,13 @@ contract StablesBondDepository is Ownable {
     /* ======= AUXILLIARY ======= */
 
     /**
-     *  @notice allow anyone to send lost tokens (excluding principle or ROME) to the DAO
+     *  @notice allow anyone to send lost tokens (excluding principle or ROME) to the WARCHEST
      *  @return bool
      */
     function recoverLostToken( address _token ) external returns ( bool ) {
         require( _token != ROME );
         require( _token != principle );
-        IERC20( _token ).safeTransfer( DAO, IERC20( _token ).balanceOf( address(this) ) );
+        IERC20( _token ).safeTransfer( WARCHEST, IERC20( _token ).balanceOf( address(this) ) );
         return true;
     }
 }

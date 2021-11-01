@@ -621,6 +621,11 @@ interface ITreasury {
     function mintRewards( address _recipient, uint _amount ) external;
 }
 
+interface IBondCalculator {
+    function valuation( address _LP, uint _amount ) external view returns ( uint );
+    function markdown( address _LP ) external view returns ( uint );
+}
+
 interface IStaking {
     function stake( uint _amount, address _recipient ) external returns ( bool );
 }
@@ -766,7 +771,7 @@ contract ChainlinkBondDepository is Ownable {
     
     /* ======== POLICY FUNCTIONS ======== */
 
-    enum PARAMETER { VESTING, PAYOUT, DEBT }
+    enum PARAMETER { VESTING, PAYOUT, FEE, DEBT }
     /**
      *  @notice set parameters for new bonds
      *  @param _parameter PARAMETER
@@ -1139,13 +1144,13 @@ contract ChainlinkBondDepository is Ownable {
     /* ======= AUXILLIARY ======= */
 
     /**
-     *  @notice allow anyone to send lost tokens (excluding principle or ROME) to the DAO
+     *  @notice allow anyone to send lost tokens (excluding principle or ROME) to the WARCHEST
      *  @return bool
      */
     function recoverLostToken( address _token ) external returns ( bool ) {
         require( _token != ROME );
         require( _token != principle );
-        IERC20( _token ).safeTransfer( DAO, IERC20( _token ).balanceOf( address(this) ) );
+        IERC20( _token ).safeTransfer( WARCHEST, IERC20( _token ).balanceOf( address(this) ) );
         return true;
     }
 }

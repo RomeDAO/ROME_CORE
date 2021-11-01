@@ -273,7 +273,7 @@ contract RomeTreasury is Ownable {
         address _WMOVR,
         address _ROMEMIM,
         address _ROMEFRAX,
-        address _ROMEMOVR,
+        address _ROMEWMOVR,
         address _bondCalculator,
         uint _blocksNeededForQueue
     ) {
