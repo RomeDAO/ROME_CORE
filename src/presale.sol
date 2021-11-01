@@ -34,6 +34,8 @@ contract RomePresale is Ownable {
 
     bool public claimable; // true when sale is claimable
 
+    address public claimHelper; // address of claimingHelper contract
+
     mapping(address => UserInfo) public userInfo;
 
     mapping(address => bool) public whitelisted; // True if user is whitelisted
@@ -50,7 +52,8 @@ contract RomePresale is Ownable {
     constructor(
         address _sROME,
         address _DAI,
-        address _DAO
+        address _DAO,
+        address _claimHelper
     ) {
         require( _sROME != address(0) );
         sROME = IERC20(_sROME);
@@ -58,6 +61,8 @@ contract RomePresale is Ownable {
         DAI = IERC20(_DAI);
         require( _DAO != address(0) );
         DAO = _DAO;
+        require( _DAO != address(0) );
+        claimHelper = _claimHelper;
     }
 
     /**
@@ -86,6 +91,11 @@ contract RomePresale is Ownable {
         whitelisted[_address] = false;
     }
 
+    // @notice It sets claim helper address
+    function setClaimHelper(address _claimHelper) external onlyOwner {
+        claimHelper = _claimHelper;
+    }
+
     // @notice Starts the sale
     function start() external onlyOwner {
         require(!started, "Sale has already started");
@@ -110,6 +120,18 @@ contract RomePresale is Ownable {
         claimable = true;
         emit ClaimUnlocked(block.number);
     }
+
+    // @notice lets users claim sROME
+    // @dev send sufficient sROME before calling
+    function claimUnlockWithHelper() external {
+        require(msg.sender == claimHelper, "msg.sender is not claimHelper");
+        require(ended, "Sale has not ended");
+        require(!claimable, "Claim has already been unlocked");
+        require(sROME.balanceOf(address(this)) >= totalDebt, 'not enough sROME in contract');
+        claimable = true;
+        emit ClaimUnlocked(block.number);
+    }
+
 
     /**
      *  @notice transfer ERC20 token to DAO multisig
