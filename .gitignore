@@ -20,3 +20,7 @@ deployments/hardhat
 deployments/localhost
 
 /.dapp
+
+/pass
+
+/.sethrc

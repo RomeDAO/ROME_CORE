@@ -44,3 +44,12 @@ export function getMnemonic(networkName?: string): string {
 export function accounts(networkName?: string): {mnemonic: string} {
   return {mnemonic: getMnemonic(networkName)};
 }
+
+export function getChainId(networkName?: string): number | undefined {
+  if (networkName) {
+    const chainId = process.env['CHAINID_' + networkName.toUpperCase()];
+    if (chainId && chainId !== null) {
+      return +chainId;
+    }
+  }
+}

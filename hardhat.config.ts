@@ -5,7 +5,7 @@ import '@nomiclabs/hardhat-ethers';
 import 'hardhat-gas-reporter';
 import '@typechain/hardhat';
 import 'solidity-coverage';
-import {node_url, accounts} from './utils/network';
+import {node_url, accounts, getChainId} from './utils/network';
 
 // While waiting for hardhat PR: https://github.com/nomiclabs/hardhat/pull/1542
 if (process.env.HARDHAT_FORK) {
@@ -15,12 +15,30 @@ if (process.env.HARDHAT_FORK) {
 const config: HardhatUserConfig = {
   solidity: {
     compilers: [
+    {
+      version: '0.6.12',
+      settings: {
+        optimizer: {
+          enabled: true,
+          runs: 9999,
+        }
+      }
+    },
+    {
+      version:'0.7.5',
+      settings: {
+        optimizer: {
+          enabled: true,
+          runs: 9999,
+        }
+      }
+    },
       {
         version: '0.8.9',
         settings: {
           optimizer: {
             enabled: true,
-            runs: 2000,
+            runs: 9999,
           },
         },
       },
@@ -28,7 +46,22 @@ const config: HardhatUserConfig = {
   },
   namedAccounts: {
     deployer: 0,
-    simpleERC20Beneficiary: 1,
+    dev: 1,
+    DAO: {
+      default: 2,
+      // Moonriver
+      1285: '',
+    },
+    OPERATION: {
+      default: 3,
+      // Moonriver
+      1285: '',
+    },
+    TAX: {
+      default: 4,
+      // Moonriver
+      1285: '',
+    }
   },
   networks: {
     hardhat: {
@@ -78,6 +111,26 @@ const config: HardhatUserConfig = {
       url: node_url('goerli'),
       accounts: accounts('goerli'),
     },
+    moonriver: {
+      url: node_url('moonriver'),
+      chainId: getChainId('moonriver'),
+      accounts: accounts('moonriver'),
+      live: true,
+      saveDeployments: true,
+      tags: ['moonriver'],
+      gasPrice: 1000000000,
+      gas: 8000000,
+    },
+    moonbase: {
+      url: node_url('moonbase'),
+      chainId: getChainId('moonbase'),
+      accounts: accounts('moonbase'),
+      live: true,
+      saveDeployments: true,
+      tags: ['moonbase'],
+      gasPrice: 1000000000,
+      gas: 8000000,
+    }
   },
   paths: {
     sources: 'src',
