@@ -30,6 +30,12 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       autoMine: true, // speed up deployment on local network (ganache, hardhat), no effect on live networks
     });
 
+    await deploy('mockDAI', {
+      from: deployer,
+      log: true,
+      autoMine: true, // speed up deployment on local network (ganache, hardhat), no effect on live networks
+    });
+
   }
   if(chainId !== '1285' && chainId !== '1287') {
     await deploy('mockFactory', {

@@ -584,41 +584,9 @@ library FixedPoint {
     }
 }
 
-interface AggregatorV3Interface {
-
-  function decimals() external view returns (uint8);
-  function description() external view returns (string memory);
-  function version() external view returns (uint256);
-
-  // getRoundData and latestRoundData should both raise "No data present"
-  // if they do not have data to report, instead of returning unset values
-  // which could be misinterpreted as actual reported values.
-  function getRoundData(uint80 _roundId)
-    external
-    view
-    returns (
-      uint80 roundId,
-      int256 answer,
-      uint256 startedAt,
-      uint256 updatedAt,
-      uint80 answeredInRound
-    );
-  function latestRoundData()
-    external
-    view
-    returns (
-      uint80 roundId,
-      int256 answer,
-      uint256 startedAt,
-      uint256 updatedAt,
-      uint80 answeredInRound
-    );
-}
-
 interface ITreasury {
     function deposit( uint _amount, address _token, uint _profit ) external returns ( bool );
     function valueOf( address _token, uint _amount ) external view returns ( uint value_ );
-    function mintRewards( address _recipient, uint _amount ) external;
 }
 
 interface IBondCalculator {
@@ -634,7 +602,7 @@ interface IStakingHelper {
     function stake( uint _amount, address _recipient ) external;
 }
 
-contract ChainlinkBondDepository is Ownable {
+contract FRAXBondDepository is Ownable {
 
     using FixedPoint for *;
     using SafeERC20 for IERC20;
@@ -658,11 +626,10 @@ contract ChainlinkBondDepository is Ownable {
     address public immutable ROME; // token given as payment for bond
     address public immutable principle; // token used to create bond
     address public immutable treasury; // mints ROME when receives principle
-    address public immutable WARCHEST; // receives fee share from bond
+    address public immutable WARCHEST; // receives fee from principle
 
+    bool public immutable isLiquidityBond; // LP and Reserve bonds are treated slightly different
     address public immutable bondCalculator; // calculates value of LP tokens
-
-    AggregatorV3Interface internal priceFeed;
 
     address public staking; // to auto-stake payout
     address public stakingHelper; // to stake and claim if no staking warmup
@@ -679,15 +646,17 @@ contract ChainlinkBondDepository is Ownable {
     bool public isInitialized; // bool to prevent deposits before initialization
 
 
+
+
     /* ======== STRUCTS ======== */
 
     // Info for creating new bonds
     struct Terms {
         uint controlVariable; // scaling variable for price
         uint vestingTerm; // in blocks
-        uint minimumPrice; // vs principle value. 4 decimals (1500 = 0.15)
+        uint minimumPrice; // vs principle value
         uint maxPayout; // in thousandths of a %. i.e. 500 = 0.5%
-        uint fee; // as % of bond principle, in hundreths. ( 500 = 5% = 0.05 for every 1 paid)]
+        uint fee; // as % of bond payout, in hundreths. ( 500 = 5% = 0.05 for every 1 paid)]
         uint maxDebt; // 9 decimal debt ratio, max % total supply created as debt
     }
 
@@ -718,8 +687,7 @@ contract ChainlinkBondDepository is Ownable {
         address _principle,
         address _treasury, 
         address _WARCHEST,
-        address _bondCalculator,
-        address _feed
+        address _bondCalculator
     ) {
         require( _ROME != address(0) );
         ROME = _ROME;
@@ -731,7 +699,7 @@ contract ChainlinkBondDepository is Ownable {
         WARCHEST = _WARCHEST;
         // bondCalculator should be address(0) if not LP bond
         bondCalculator = _bondCalculator;
-        priceFeed = AggregatorV3Interface( _feed );
+        isLiquidityBond = ( _bondCalculator != address(0) );
     }
 
     /**
@@ -740,6 +708,7 @@ contract ChainlinkBondDepository is Ownable {
      *  @param _vestingTerm uint
      *  @param _minimumPrice uint
      *  @param _maxPayout uint
+     *  @param _fee uint
      *  @param _maxDebt uint
      *  @param _initialDebt uint
      */
@@ -855,14 +824,6 @@ contract ChainlinkBondDepository is Ownable {
         decayDebt();
         require( totalDebt <= terms.maxDebt, "Max capacity reached" );
 
-        // feees are calculated
-        uint fee = _amount.mul( terms.fee ).div( 10000 );
-        _amount = _amount.sub( fee );
-
-        if ( fee != 0 ) { // fee is transferred to warchest
-            IERC20( principle ).safeTransfer( WARCHEST, fee );
-        }
-        
         uint priceInUSD = bondPriceInUSD(); // Stored in bond info
         uint nativePrice = _bondPrice();
 
@@ -874,12 +835,22 @@ contract ChainlinkBondDepository is Ownable {
         require( payout >= 10000000, "Bond too small" ); // must be > 0.01 ROME ( underflow protection )
         require( payout <= maxPayout(), "Bond too large"); // size protection because there is no slippage
 
+        // profits are calculated
+        uint fee = payout.mul( terms.fee ).div( 10000 );
+        uint profit = value.sub( payout ).sub( fee );
+
         /**
-            asset carries risk and is not minted against
-            asset transfered to treasury and rewards minted as payout
+            principle is transferred in
+            approved and
+            deposited into the treasury, returning (_amount - profit) ROME
          */
-        IERC20( principle ).safeTransferFrom( msg.sender, treasury, _amount );
-        ITreasury( treasury ).mintRewards( address(this), payout );
+        IERC20( principle ).safeTransferFrom( msg.sender, address(this), _amount );
+        IERC20( principle ).approve( address( treasury ), _amount );
+        ITreasury( treasury ).deposit( _amount, principle, profit );
+        
+        if ( fee != 0 ) { // fee is transferred to WARCHEST
+            IERC20( ROME ).safeTransfer( WARCHEST, fee );
+        }
         
         // total debt is increased
         totalDebt = totalDebt.add( value ); 
@@ -1008,7 +979,7 @@ contract ChainlinkBondDepository is Ownable {
      *  @return uint
      */
     function payoutFor( uint _value ) public view returns ( uint ) {
-        return FixedPoint.fraction( _value, bondPrice() ).decode112with18().div( 1e14 );
+        return FixedPoint.fraction( _value, bondPrice() ).decode112with18().div( 1e16 );
     }
 
 
@@ -1017,7 +988,7 @@ contract ChainlinkBondDepository is Ownable {
      *  @return price_ uint
      */
     function bondPrice() public view returns ( uint price_ ) {        
-        price_ = terms.controlVariable.mul( debtRatio() ).div( 1e5 );
+        price_ = terms.controlVariable.mul( debtRatio() ).add( 1000000000 ).div( 1e7 );
         if ( price_ < terms.minimumPrice ) {
             price_ = terms.minimumPrice;
         }
@@ -1028,7 +999,7 @@ contract ChainlinkBondDepository is Ownable {
      *  @return price_ uint
      */
     function _bondPrice() internal returns ( uint price_ ) {
-        price_ = terms.controlVariable.mul( debtRatio() ).div( 1e5 );
+        price_ = terms.controlVariable.mul( debtRatio() ).add( 1000000000 ).div( 1e7 );
         if ( price_ < terms.minimumPrice ) {
             price_ = terms.minimumPrice;        
         } else if ( terms.minimumPrice != 0 ) {
@@ -1037,25 +1008,14 @@ contract ChainlinkBondDepository is Ownable {
     }
 
     /**
-     *  @notice get asset price from chainlink
-     */
-    function assetPrice() public view returns (int) {
-        ( , int price, , , ) = priceFeed.latestRoundData();
-        return price;
-    }
-
-    /**
      *  @notice converts bond price to DAI value
      *  @return price_ uint
      */
     function bondPriceInUSD() public view returns ( uint price_ ) {
-        if (bondCalculator == address(0)) {
-            price_ = bondPrice().mul( uint( assetPrice() ) ).mul( 1e6 );
+        if( isLiquidityBond ) {
+            price_ = bondPrice().mul( IBondCalculator( bondCalculator ).markdown( principle ) ).div( 100 );
         } else {
-            price_ = bondPrice()
-                    .mul( IBondCalculator( bondCalculator ).markdown( principle ) )
-                    .mul( uint( assetPrice() ) )
-                    .div( 1e12 );
+            price_ = bondPrice().mul( 10 ** IERC20( principle ).decimals() ).div( 100 );
         }
     }
 
@@ -1065,22 +1025,22 @@ contract ChainlinkBondDepository is Ownable {
      *  @return debtRatio_ uint
      */
     function debtRatio() public view returns ( uint debtRatio_ ) {   
-        debtRatio_ = FixedPoint.fraction(
-            currentDebt().mul( 1e9 ),
-            IERC20( ROME ).totalSupply()
+        uint supply = IERC20( ROME ).totalSupply();
+        debtRatio_ = FixedPoint.fraction( 
+            currentDebt().mul( 1e9 ), 
+            supply
         ).decode112with18().div( 1e18 );
     }
 
-
     /**
-     *  @notice debt ratio in same terms as reserve bonds
+     *  @notice debt ratio in same terms for reserve or liquidity bonds
      *  @return uint
      */
     function standardizedDebtRatio() external view returns ( uint ) {
-        if (bondCalculator == address(0)) {
-            return debtRatio().mul( uint( assetPrice() ) ).div( 1e8 ); // ETH feed is 8 decimals
-        } else {
+        if ( isLiquidityBond ) {
             return debtRatio().mul( IBondCalculator( bondCalculator ).markdown( principle ) ).div( 1e9 );
+        } else {
+            return debtRatio();
         }
     }
 

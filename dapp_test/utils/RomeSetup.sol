@@ -8,16 +8,24 @@ import '../Interfaces/IRouter.sol';
 import '../Interfaces/IERC20.sol';
 import "./GenericAccount.sol";
 import {RomeBondingCalculator} from "../../src/BondingCalculator.sol";
-import {StablesBondDepository} from "../../src/Bonds/StablesBondDepository.sol";
-import {ChainlinkBondDepository} from"../../src/Bonds/ChainlinkBondDepository.sol";
-import {RedeemHelper} from"../../src/RedeemHelper.sol";
-import {RomeTreasury} from"../../src/Treasury.sol";
-import {Distributor} from"../../src/Distributor.sol";
-import {RomeStaking} from"../../src/Staking.sol";
-import {StakingHelper} from"../../src/StakingHelper.sol";
-import {Rome} from"../../src/RomeERC20.sol";
-import {sRome} from"../../src/sRomeERC20.sol";
-import {RomePresale} from"../../src/presale.sol";
+import {ROMEMOVRBondDepository} from "../../src/Bonds/ROMEMOVRBondDepository.sol";
+import {MOVRBondDepository} from "../../src/Bonds/MOVRBondDepository.sol";
+import {MIMBondDepository} from "../../src/Bonds/MIMBondDepository.sol";
+import {FRAXBondDepository} from "../../src/Bonds/FRAXBondDepository.sol";
+import {ROMEMIMBondDepository} from "../../src/Bonds/ROMEMIMBondDepository.sol";
+import {ROMEFRAXBondDepository} from "../../src/Bonds/ROMEFRAXBondDepository.sol";
+import {RedeemHelper} from "../../src/RedeemHelper.sol";
+import {RomeTreasury} from "../../src/Treasury.sol";
+import {Distributor} from "../../src/Distributor.sol";
+import {RomeStaking} from "../../src/Staking.sol";
+import {StakingWarmup} from "../../src/StakingWarmup.sol";
+import {StakingHelper} from "../../src/StakingHelper.sol";
+import {Rome} from "../../src/RomeERC20.sol";
+import {sRome} from "../../src/sRomeERC20.sol";
+import {aRome} from "../../src/aRomeERC20.sol";
+import {DaiRomePresale} from "../../src/Presale/DaiPresale.sol";
+import {ClaimHelper} from "../../src/Presale/ClaimHelper.sol";
+
 
 contract RomeUser is GenericAccount {
 

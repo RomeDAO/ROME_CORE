@@ -747,12 +747,12 @@ contract Ownable is IOwnable {
     }
 }
 
-contract VaultOwned is Ownable {
+contract PresaleOwned is Ownable {
     
-  address internal _vault;
+  address internal _presale;
 
-  function setVault( address vault_ ) external onlyManager() returns ( bool ) {
-    _vault = vault_;
+  function setPresale( address presale_ ) external onlyManager() returns ( bool ) {
+    _presale = presale_;
 
     return true;
   }
@@ -760,28 +760,28 @@ contract VaultOwned is Ownable {
   /**
    * @dev Returns the address of the current vault.
    */
-  function vault() public view returns (address) {
-    return _vault;
+  function presale() public view returns (address) {
+    return _presale;
   }
 
   /**
    * @dev Throws if called by any account other than the vault.
    */
-  modifier onlyVault() {
-    require( _vault == msg.sender, "VaultOwned: caller is not the Vault" );
+  modifier onlyPresale() {
+    require( _presale == msg.sender, "PresaleOwned: caller is not the Presale" );
     _;
   }
 
 }
 
-contract Rome is ERC20Permit, VaultOwned {
+contract aRome is ERC20Permit, PresaleOwned {
 
   using SafeMath for uint256;
 
-    constructor() ERC20("Rome", "ROME", 9) {
+    constructor() ERC20("Alpha Rome", "aROME", 9) {
     }
 
-    function mint(address account_, uint256 amount_) external onlyVault() {
+    function mint(address account_, uint256 amount_) external onlyPresale() {
         _mint(account_, amount_);
     }
 

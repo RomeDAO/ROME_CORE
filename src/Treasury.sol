@@ -268,6 +268,7 @@ contract RomeTreasury is Ownable {
 
     constructor (
         address _ROME,
+        address _DAI,
         address _MIM,
         address _FRAX,
         address _WMOVR,
@@ -279,6 +280,9 @@ contract RomeTreasury is Ownable {
     ) {
         require( _ROME != address(0) );
         ROME = _ROME;
+
+        isReserveToken[ _DAI ] = true;
+        reserveTokens.push( _DAI );
 
         isReserveToken[ _MIM ] = true;
         reserveTokens.push( _MIM );

@@ -52,12 +52,12 @@ const config: HardhatUserConfig = {
       // Moonriver
       1285: '',
     },
-    OPERATION: {
+    OPS: {
       default: 3,
       // Moonriver
       1285: '',
     },
-    TAX: {
+    WARCHEST: {
       default: 4,
       // Moonriver
       1285: '',

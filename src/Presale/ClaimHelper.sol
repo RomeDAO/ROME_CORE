@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity 0.7.5;
 
-import './Libraries/Ownable.sol';
-import './Libraries/SafeERC20.sol';
+import '../Libraries/Ownable.sol';
+import '../Libraries/SafeERC20.sol';
 
 interface IFactory {
     event PairCreated(address indexed token0, address indexed token1, address pair, uint);
@@ -53,18 +53,25 @@ contract ClaimHelper is Ownable{
 
     address public DAO;
 
-    IPresale public PRESALE;
+    IPresale public DAI_PRESALE;
 
-    constructor(address _ROME, address _PRESALE, address _DAO) {
+    constructor(address _ROME, address _DAO) {
         require( _ROME != address(0) );
         ROME = _ROME;
-        require( _ROME != address(0) );
-        PRESALE = IPresale(_PRESALE);
         require( _DAO != address(0) );
         DAO = _DAO;
     }
 
+    function setPresale(address _DAI_PRESALE) external onlyOwner returns ( bool ){
+        require( _DAI_PRESALE != address(0) );
+        DAI_PRESALE = IPresale(_DAI_PRESALE);
+        return true;
+
+    }
+
     function Claim() external onlyOwner {
+        require( address(DAI_PRESALE) != address(0) );
+
         // Sushi Router
         IRouter router = IRouter(0xc35DADB65012eC5796536bD9864eD8773aBc74C4);
 
@@ -123,7 +130,7 @@ contract ClaimHelper is Ownable{
             block.timestamp // deadline
         );
 
-        PRESALE.claimUnlockWithHelper();
+        DAI_PRESALE.claimUnlockWithHelper();
     }
 
 }
