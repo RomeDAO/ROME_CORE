@@ -18,7 +18,6 @@ interface IPresale {
 
 interface IRouter {
     function factory() external pure returns (address);
-    function WETH() external pure returns (address);
 
     function addLiquidity(
         address tokenA,
@@ -30,30 +29,22 @@ interface IRouter {
         address to,
         uint deadline
     ) external returns (uint amountA, uint amountB, uint liquidity);
-    function addLiquidityETH(
-        address token,
-        uint amountTokenDesired,
-        uint amountTokenMin,
-        uint amountETHMin,
-        address to,
-        uint deadline
-    ) external payable returns (uint amountToken, uint amountETH, uint liquidity);
 }
 
 contract ClaimHelper is Ownable{
     using SafeERC20 for IERC20;
-
-    address public FRAX = 0x1A93B23281CC1CDE4C4741353F3064709A16197d;
-
-    address public MIM = 0x0caE51e1032e8461f4806e26332c030E34De3aDb;
-
-    address public WMOVR = 0x98878B06940aE243284CA214f92Bb71a2b032B8A;
+    using SafeMath for uint;
 
     address public ROME;
 
     address public DAO;
 
     IPresale public DAI_PRESALE;
+
+    modifier onlyDAO() {
+        require( DAO == msg.sender, "Ownable: caller is not DAO" );
+        _;
+    }
 
     constructor(address _ROME, address _DAO) {
         require( _ROME != address(0) );
@@ -69,63 +60,27 @@ contract ClaimHelper is Ownable{
 
     }
 
-    function Claim() external onlyOwner {
+    function Claim(uint256 _amountRome, uint256 _amountToken, address _router, address _token) external onlyDAO {
         require( address(DAI_PRESALE) != address(0) );
 
-        // Sushi Router
-        IRouter router = IRouter(0xc35DADB65012eC5796536bD9864eD8773aBc74C4);
+        IRouter router = IRouter(_router);
 
         require(
-            IERC20( ROME ).balanceOf(msg.sender) >= (74975 * 1e9),
+            IERC20( ROME ).balanceOf(msg.sender) >= _amountRome,
             'msg.sender does not have enough ROME'
             );
         require(
-            IERC20( FRAX ).balanceOf(msg.sender) >= (200000 * 1e18),
+            IERC20( _token ).balanceOf(msg.sender) >= _amountToken,
             'msg.sender does not have enough FRAX'
-            );
-        require(
-            IERC20( MIM ).balanceOf(msg.sender) >= (200000 * 1e18),
-            'msg.sender does not have enough MIM'
-            );
-        require(
-            IERC20( WMOVR ).balanceOf(msg.sender) >= (555 * 1e18),
-            'msg.sender does not have enough WMOVR'
             );
         // add frax liquidity 8$
         router.addLiquidity(
             ROME, // token A
-            FRAX, // token B
-            25000 * 1e9, // amount A Desired (1e9)
-            200000 * 1e18, // amount B Desired (1e18)
-            25000 * 1e9, // amount A Min
-            200000 * 1e18, // amount B Min
-            DAO, // to
-            block.timestamp // deadline
-        );
-
-        // Solar Router
-        router = IRouter(0x049581aEB6Fe262727f290165C29BDAB065a1B68);
-
-        // add mim liquidity 8$
-        router.addLiquidity(
-            ROME, // token A
-            MIM, // token B
-            25000 * 1e9, // amount A Desired (1e9)
-            200000 * 1e18, // amount B Desired (1e18)
-            25000 * 1e9, // amount A Min
-            200000 * 1e18, // amount B Min
-            DAO, // to
-            block.timestamp // deadline
-        );
-
-        // add movr liquidity MOVR = 360$
-        router.addLiquidity(
-            ROME, // token A
-            WMOVR, // token B
-            24975 * 1e9, // amount A Desired (1e9)
-            555 * 1e18, // amount B Desired (1e18)
-            25000 * 1e9, // amount A Min
-            277 * 1e18, // amount B Min
+            _token, // token B
+            _amountRome, // amount A Desired (1e9)
+            _amountToken, // amount B Desired (1e18)
+            _amountRome, // amount A Min
+            _amountToken, // amount B Min
             DAO, // to
             block.timestamp // deadline
         );
