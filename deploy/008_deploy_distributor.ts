@@ -7,7 +7,9 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deploy,get} = hre.deployments;
 
   const rome = await get('Rome');
+  const srome = await get('sRome');
   const treasury = await get('RomeTreasury');
+  const staking = await get('RomeStaking');
 
   await deploy('Distributor', {
     from: deployer,
@@ -16,7 +18,14 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     autoMine: true, // speed up deployment on local network (ganache, hardhat), no effect on live networks
   });
 
+  const distibutor = await get('Distributor');
+
+  await hre.run("verify:verify", {
+      address: distibutor.address,
+      constructorArguments: [staking.address, srome.address],
+  })
+
 };
 export default func;
-func.tags = ['Distributor'];
+func.tags = ['Distributor','STAKING'];
 func.dependencies = ['Rome','RomeTreasury'];

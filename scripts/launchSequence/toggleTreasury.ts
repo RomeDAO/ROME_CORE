@@ -1,7 +1,8 @@
-import {ethers} from 'hardhat';
-import {zeroAddress} from '../utils/constants';
+import {getNamedAccounts,ethers} from 'hardhat';
+import {zeroAddress} from '../../utils/constants';
 
 async function main() {
+  const {DAO} = await getNamedAccounts();
 
   // get contracts
   const Treasury = await ethers.getContract('RomeTreasury');

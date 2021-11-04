@@ -1,8 +1,7 @@
-import {HardhatRuntimeEnvironment} from 'hardhat/types';
-import {ethers} from 'hardhat';
+import {getNamedAccounts,ethers} from 'hardhat';
 
-async function main(hre: HardhatRuntimeEnvironment) {
-  const {DAO,OPS} = await hre.getNamedAccounts();
+async function main() {
+  const {DAO,OPS} = await getNamedAccounts();
 
   const sROME = await ethers.getContract('sRome');
   await sROME.pushManagement( DAO );
@@ -21,9 +20,6 @@ async function main(hre: HardhatRuntimeEnvironment) {
 
   const RedeemHelper = await ethers.getContract('RedeemHelper');
   await RedeemHelper.pushManagement( OPS );
-
-  const aROME = await ethers.getContract('aRome');
-  await aROME.pushManagement( DAO );
 }
 main()
   .then(() => process.exit(0))

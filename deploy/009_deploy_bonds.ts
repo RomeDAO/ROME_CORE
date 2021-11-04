@@ -1,7 +1,7 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
 import {ethers} from 'hardhat';
-import {WMOVR,MIM,FRAX,SOLARFACTORY,SUSHIFACTORY} from '../utils/constants';
+import {WMOVR,MIM,FRAX,SOLARFACTORY} from '../utils/constants';
 
 import {abi} from '../deployments/moonriver/sushiFactory.json';
 
@@ -10,7 +10,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const chainId = await hre.getChainId();
   const {deploy,get} = hre.deployments;
 
-  let frax,mim,wmovr,romewmovr,romemim,romefrax,feed,solarFactory,sushiFactory;
+  let frax,mim,wmovr,romefrax,feed,solarFactory;
 
   const rome = await get('Rome');
   const treasury = await get('RomeTreasury');
@@ -19,7 +19,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   // moonriver mainnet
   if (chainId == '1285') {
     solarFactory = await ethers.getContractAt(abi, SOLARFACTORY);
-    sushiFactory = await ethers.getContractAt(abi, SUSHIFACTORY);
 
     mim = MIM;
     frax = FRAX;
@@ -28,14 +27,11 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     // MOVR price feed from chainlink
     feed = '';
     // Get LP pair addresses
-    romewmovr = await solarFactory.callStatic.createPair(rome.address,WMOVR);
-    romemim = await solarFactory.callStatic.createPair(rome.address,MIM);
-    romefrax = await sushiFactory.callStatic.createPair(rome.address,FRAX);
+    romefrax = await solarFactory.callStatic.createPair(rome.address,FRAX);
 
   // moonbase testnet
   } else if (chainId == '1287') {
     solarFactory = await ethers.getContractAt(abi, '0xf84186b18c2Cc2354ce1aa8A5F9aCd763AA5a096');
-    sushiFactory = await ethers.getContractAt(abi, SUSHIFACTORY);
 
     frax = await get('mockFRAX');
     frax = frax.address;
@@ -49,9 +45,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     // MOVR price feed from chainlink
     feed = '';
     // Get LP pair addresses
-    romewmovr = await solarFactory.callStatic.createPair(rome.address,wmovr);
-    romemim = await solarFactory.callStatic.createPair(rome.address,mim);
-    romefrax = await sushiFactory.callStatic.createPair(rome.address,frax);
+    romefrax = await solarFactory.callStatic.createPair(rome.address,frax);
   } else {
     const factory = await ethers.getContract('mockFactory');
 
@@ -67,13 +61,9 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     // MOVR price feed from chainlink
     feed = '';
     // Get LP pair addresses
-    romewmovr = await factory.callStatic.createPair(rome.address,wmovr);
-    romemim = await factory.callStatic.createPair(rome.address,mim);
     romefrax = await factory.callStatic.createPair(rome.address,frax);
   }
 
-  console.log('ROME/WMOVR @ ' + romewmovr);
-  console.log('ROME/MIM @ ' + romemim);
   console.log('ROME/FRAX @ ' + romefrax);
 
   if (chainId == '1285' || chainId == '1287') {
@@ -81,14 +71,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     await deploy('MOVRBondDepository', {
       from: deployer,
       args: [rome.address,wmovr,treasury.address,WARCHEST, calculator.address, feed],
-      log: true,
-      autoMine: true, // speed up deployment on local network (ganache, hardhat), no effect on live networks
-    });
-
-    // Deploy ROME/MOVR bonds
-    await deploy('ROMEMOVRBondDepository', {
-      from: deployer,
-      args: [rome.address,romewmovr,treasury.address,WARCHEST, calculator.address, feed],
       log: true,
       autoMine: true, // speed up deployment on local network (ganache, hardhat), no effect on live networks
     });
@@ -109,14 +91,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     autoMine: true, // speed up deployment on local network (ganache, hardhat), no effect on live networks
   });
 
-  // Deploy ROME/MIM bonds
-  await deploy('ROMEMIMBondDepository', {
-    from: deployer,
-    args: [rome.address,romemim,treasury.address,WARCHEST, calculator.address],
-    log: true,
-    autoMine: true, // speed up deployment on local network (ganache, hardhat), no effect on live networks
-  });
-
   // Deploy ROME/FRAX bonds
   await deploy('ROMEFRAXBondDepository', {
     from: deployer,
@@ -125,8 +99,33 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     autoMine: true, // speed up deployment on local network (ganache, hardhat), no effect on live networks
   });
 
+  if (chainId == '1285' || chainId == '1287') {
+  const movrBonds = await get('MOVRBondDepository');
 
+  await hre.run("verify:verify", {
+      address: movrBonds.address,
+      constructorArguments: [rome.address,wmovr,treasury.address,WARCHEST, calculator.address, feed],
+  })
+  }
 
+  const fraxBonds = await get('FRAXBondDepository');
+
+  await hre.run("verify:verify", {
+      address: fraxBonds.address,
+      constructorArguments: [rome.address,frax,treasury.address,WARCHEST, calculator.address],
+  })
+  const mimBonds = await get('MIMBondDepository');
+
+  await hre.run("verify:verify", {
+      address: mimBonds.address,
+      constructorArguments: [rome.address,mim,treasury.address,WARCHEST, calculator.address],
+  })
+  const romefraxBonds = await get('ROMEFRAXBondDepository');
+
+  await hre.run("verify:verify", {
+      address: romefraxBonds.address,
+      constructorArguments: [rome.address,romefrax,treasury.address,WARCHEST, calculator.address],
+  })
 };
 export default func;
 func.tags = ['Bonds'];

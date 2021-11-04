@@ -73,6 +73,7 @@
     "fork:test": "node ./_scripts.js fork:test"
   },
   "dependencies": {
-    "eth-cli": "^2.0.2"
+    "eth-cli": "^2.0.2",
+    "ganache": "^6.4.5"
   }
 }

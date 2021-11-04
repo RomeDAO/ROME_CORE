@@ -26,12 +26,29 @@ import {aRome} from "../../src/aRomeERC20.sol";
 import {DaiRomePresale} from "../../src/Presale/DaiPresale.sol";
 import {ClaimHelper} from "../../src/Presale/ClaimHelper.sol";
 
-
-contract RomeUser is GenericAccount {
-
+contract Dao {
     constructor() {
     }
+}
 
+contract Warchest {
+    constructor() {
+    }
+}
+
+contract Ops {
+    constructor() {
+    }
+}
+
+contract RomeUser {
+    constructor() {
+    }
+}
+
+contract RomeTeam {
+    constructor() {
+    }
 }
 
 abstract contract RomeTest is DSTest {
@@ -44,26 +61,87 @@ abstract contract RomeTest is DSTest {
 
     IERC20 FRAX;
 
+    IERC20 DAI;
+
+    IRouter solarRouter;
+
+    IFactory solarFactory;
+
     Rome ROME;
 
-    sRome SROME;
+    aRome aROME;
 
-    RomeBondingCalculator internal bondingCalculator;
+    sRome sROME;
+
+    Dao DAO;
+
+    Warchest WARCHEST;
+
+    Ops OPS;
 
     uint256 numberUsers = 5;
 
     RomeUser[] internal user;
 
+    RomeTeam[] internal team;
+
     function setUp() public virtual {
+        // Moonriver deployments
         WMOVR = IERC20(0x98878B06940aE243284CA214f92Bb71a2b032B8A);
         MIM = IERC20(0x0caE51e1032e8461f4806e26332c030E34De3aDb);
         FRAX = IERC20(0x1A93B23281CC1CDE4C4741353F3064709A16197d);
+        DAI = IERC20(0x80A16016cC4A2E6a2CACA8a4a498b1699fF0f844);
+        solarRouter = IRouter(0xAA30eF758139ae4a7f798112902Bf6d65612045f);
+        solarFactory = IFactory(0x049581aEB6Fe262727f290165C29BDAB065a1B68);
+
+        ROME = new Rome();
+
+        aROME = new aRome();
+
+        sROME = new sRome();
 
         for (uint i = 0; i < numberUsers; i++) {
             user.push( new RomeUser() );
+            team.push( new RomeTeam() );
         }
+        DAO = new Dao();
+        WARCHEST = new Warchest();
+        OPS = new Ops();
+    }
 
-        log("test");
+    ClaimHelper CLAIMHELPER;
+    DaiRomePresale PRESALE;
 
+    function PresaleDeploy() public virtual {
+        CLAIMHELPER = new ClaimHelper( address( ROME ), address( DAO ) );
+        PRESALE = new DaiRomePresale(
+            address( aROME ),
+            address( ROME ),
+            address( DAI ),
+            address( DAO ),
+            address( WARCHEST ),
+            address( CLAIMHELPER )
+        );
+    }
+
+
+    RomeTreasury TREASURY;
+    RomeBondingCalculator CALCULATOR;
+    address ROMEFRAX;
+    function TreasuryDeploy() public virtual {
+        CALCULATOR = new RomeBondingCalculator( address( ROME ) );
+
+        ROMEFRAX = solarFactory.createPair( address( ROME ), address( FRAX ) );
+
+        TREASURY = new RomeTreasury(
+            address( ROME ),
+            address( DAI ),
+            address( MIM ),
+            address( FRAX ),
+            address( WMOVR ),
+            ROMEFRAX,
+            address( CALCULATOR ),
+            6400 // 1 DAY timelock
+        );
     }
 }

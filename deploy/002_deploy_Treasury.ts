@@ -1,7 +1,7 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
 import {ethers} from 'hardhat';
-import {FRAX, MIM, DAI, WMOVR, SOLARFACTORY, SUSHIFACTORY} from '../utils/constants';
+import {FRAX, MIM, DAI, WMOVR, SOLARFACTORY} from '../utils/constants';
 
 import {abi} from '../deployments/moonriver/sushiFactory.json';
 
@@ -10,7 +10,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const chainId = await hre.getChainId();
   const {deploy,get} = hre.deployments;
 
-  let rome, frax, mim, dai, romewmovr, romemim, romefrax, solarFactory, sushiFactory, wmovr;
+  let rome, frax, mim, dai, romefrax, solarFactory, wmovr;
 
   // moonriver mainnet
   if (chainId == '1285') {
@@ -27,11 +27,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
     solarFactory = await ethers.getContractAt(abi, SOLARFACTORY);
 
-    sushiFactory = await ethers.getContractAt(abi, SUSHIFACTORY);
-
-    romewmovr = await solarFactory.callStatic.createPair(rome.address,WMOVR);
-    romefrax = await sushiFactory.callStatic.createPair(rome.address,FRAX);
-    romemim = await solarFactory.callStatic.createPair(rome.address,MIM);
+    romefrax = await solarFactory.callStatic.createPair(rome.address,FRAX);
 
     // moonbase alpha testnet
   } else if (chainId == '1287') {
@@ -52,11 +48,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
     solarFactory = await ethers.getContractAt(abi,'0xf84186b18c2Cc2354ce1aa8A5F9aCd763AA5a096');
 
-    sushiFactory = await ethers.getContractAt(abi, SUSHIFACTORY);
-
-    romewmovr = await solarFactory.callStatic.createPair(rome.address,wmovr);
-    romefrax = await sushiFactory.callStatic.createPair(rome.address,frax);
-    romemim = await solarFactory.callStatic.createPair(rome.address,mim);
+    romefrax = await solarFactory.callStatic.createPair(rome.address,frax);
 
   } else {
 
@@ -76,24 +68,28 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
     const factory = await ethers.getContract('mockFactory');
 
-    romewmovr = await factory.callStatic.createPair(rome.address,wmovr);
     romefrax = await factory.callStatic.createPair(rome.address,frax);
-    romemim = await factory.callStatic.createPair(rome.address,mim);
   }
 
   const calculator = await get('RomeBondingCalculator');
 
-  console.log('ROME/WMOVR @ ' + romewmovr);
-  console.log('ROME/MIM @ ' + romemim);
   console.log('ROME/FRAX @ ' + romefrax);
 
   await deploy('RomeTreasury', {
     from: deployer,
-    args: [rome.address, dai, mim, frax, wmovr, romemim, romefrax, romewmovr, calculator.address, '6400'], // 1 Day timelock
+    args: [rome.address, dai, mim, frax, wmovr, romefrax, calculator.address, '6400'], // 1 Day timelock
     log: true,
     autoMine: true, // speed up deployment on local network (ganache, hardhat), no effect on live networks
   });
+
+  const Treasury = await ethers.getContract('RomeTreasury');
+
+  await hre.run("verify:verify", {
+      address: Treasury.address,
+      constructorArguments: [rome.address, dai, mim, frax, wmovr, romefrax, calculator.address, '6400'],
+  })
+
 };
 export default func;
-func.tags = ['RomeTreasury'];
+func.tags = ['RomeTreasury','TREASURY'];
 func.dependencies = ['Rome','RomeBondingCalculator','Mocks'];

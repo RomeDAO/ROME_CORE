@@ -73,6 +73,10 @@ contract ClaimHelper is Ownable{
             IERC20( _token ).balanceOf(msg.sender) >= _amountToken,
             'msg.sender does not have enough FRAX'
             );
+
+        IERC20( ROME ).approve( address( router ), _amountRome );
+        IERC20( _token ).approve( address( router ), _amountToken );
+
         // add frax liquidity 8$
         router.addLiquidity(
             ROME, // token A

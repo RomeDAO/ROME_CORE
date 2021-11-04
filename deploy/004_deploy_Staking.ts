@@ -16,6 +16,12 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     autoMine: true, // speed up deployment on local network (ganache, hardhat), no effect on live networks
   });
 
+  const romeStaking = await get('RomeStaking');
+
+  await hre.run("verify:verify", {
+      address: romeStaking.address,
+      constructorArguments: [rome.address, srome.address, epochLength, firstEpochNumber, firstEpochBlock],
+  })
 };
 export default func;
 func.tags = ['RomeStaking'];

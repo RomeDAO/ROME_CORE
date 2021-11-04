@@ -3716,6 +3716,11 @@
     "source-map-support" "0.5.12"
     "yargs" "13.2.4"
 
+"ganache@^6.4.5":
+  "integrity" "sha512-RVN/wOh3nEO4cG3PFojU7RXZTS+fYEW/mgg2bMZ8EdOP02T/HsQnw2b+fF2jKpdQ8ILz5EJWlWcZOGbzx2inNQ=="
+  "resolved" "https://registry.npmjs.org/ganache/-/ganache-6.4.5.tgz"
+  "version" "6.4.5"
+
 "get-caller-file@^2.0.1", "get-caller-file@^2.0.5":
   "integrity" "sha512-DyFP3BM/3YHTQOCUL/w0OZHR0lpKeGrxotcHWcqNEdnltqFwXVfhEBQ94eIo34AfQpo0rGki4cyIiftY06h2Fg=="
   "resolved" "https://registry.npmjs.org/get-caller-file/-/get-caller-file-2.0.5.tgz"

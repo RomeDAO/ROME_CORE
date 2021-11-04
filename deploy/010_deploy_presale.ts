@@ -44,7 +44,19 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   await claimHelper.setPresale(DaiPresale.address);
   await claimHelper.transferOwnership( DAO );
 
+  await hre.run("verify:verify", {
+      address: claimHelper.address,
+      constructorArguments: [rome.address,DAO],
+  })
+
+  const presale = await get('DaiRomePresale');
+
+  await hre.run("verify:verify", {
+      address: presale.address,
+      constructorArguments: [arome.address, rome.address, dai, DAO, WARCHEST, claimHelper.address],
+  })
+
 };
 export default func;
-func.tags = ['ClaimHelper','RomePresale'];
+func.tags = ['ClaimHelper','DaiRomePresale','PRESALE'];
 func.dependencies = ['Rome', 'aRome', 'Mocks'];

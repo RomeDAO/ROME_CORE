@@ -15,6 +15,13 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     args: [rome.address],
     autoMine: true, // speed up deployment on local network (ganache, hardhat), no effect on live networks
   });
+
+  const calculator = await get('RomeBondingCalculator');
+
+  await hre.run("verify:verify", {
+      address: calculator.address,
+  })
+
 };
 export default func;
 func.tags = ['RomeBondingCalculator'];

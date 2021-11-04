@@ -23,7 +23,20 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     autoMine: true, // speed up deployment on local network (ganache, hardhat), no effect on live networks
   });
 
+  const stakingHelper = await get('StakingHelper');
+
+  await hre.run("verify:verify", {
+      address: stakingHelper.address,
+      constructorArguments: [staking.address,rome.address],
+  })
+  const stakingWarmup = await get('StakingWarmup');
+
+  await hre.run("verify:verify", {
+      address: stakingWarmup.address,
+      constructorArguments: [staking.address, srome.address],
+  })
+
 };
 export default func;
-func.tags = ['StakingHelper','StakingWarmup'];
+func.tags = ['StakingHelper','StakingWarmup','STAKING'];
 func.dependencies = ['Rome', 'sRome','RomeStaking'];
