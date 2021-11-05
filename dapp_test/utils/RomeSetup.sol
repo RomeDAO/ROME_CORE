@@ -8,11 +8,8 @@ import '../Interfaces/IRouter.sol';
 import '../Interfaces/IERC20.sol';
 import "./GenericAccount.sol";
 import {RomeBondingCalculator} from "../../src/BondingCalculator.sol";
-import {ROMEMOVRBondDepository} from "../../src/Bonds/ROMEMOVRBondDepository.sol";
-import {MOVRBondDepository} from "../../src/Bonds/MOVRBondDepository.sol";
 import {MIMBondDepository} from "../../src/Bonds/MIMBondDepository.sol";
 import {FRAXBondDepository} from "../../src/Bonds/FRAXBondDepository.sol";
-import {ROMEMIMBondDepository} from "../../src/Bonds/ROMEMIMBondDepository.sol";
 import {ROMEFRAXBondDepository} from "../../src/Bonds/ROMEFRAXBondDepository.sol";
 import {RedeemHelper} from "../../src/RedeemHelper.sol";
 import {RomeTreasury} from "../../src/Treasury.sol";
@@ -129,6 +126,7 @@ abstract contract RomeTest is DSTest {
     RomeTreasury TREASURY;
     RomeBondingCalculator CALCULATOR;
     address ROMEFRAX;
+
     function TreasuryDeploy() public virtual {
         CALCULATOR = new RomeBondingCalculator( address( ROME ) );
 
@@ -143,5 +141,63 @@ abstract contract RomeTest is DSTest {
             address( CALCULATOR ),
             6400 // 1 DAY timelock
         );
+    }
+
+    MIMBondDepository MIMBOND;
+    FRAXBondDepository FRAXBOND;
+    ROMEFRAXBondDepository ROMEFRAXBOND;
+    RedeemHelper REDEEMHELPER;
+
+    function BondsDeploy() public virtual {
+        REDEEMHELPER = new RedeemHelper();
+
+        MIMBOND = new MIMBondDepository(
+            address( ROME ),
+            address( MIM ),
+            address( TREASURY ),
+            address( WARCHEST ),
+            address( CALCULATOR )
+        );
+        FRAXBOND = new FRAXBondDepository(
+            address( ROME ),
+            address( FRAX ),
+            address( TREASURY ),
+            address( WARCHEST ),
+            address( CALCULATOR )
+        );
+        ROMEFRAXBOND = new ROMEFRAXBondDepository(
+            address( ROME ),
+            address( FRAX ),
+            address( TREASURY ),
+            address( WARCHEST ),
+            address( CALCULATOR )
+        );
+    }
+
+    RomeStaking STAKING;
+    Distributor DISTRIBUTOR;
+    StakingHelper STAKINGHELPER;
+    StakingWarmup WARMUP;
+
+    uint epochLength = 2200;
+    uint firstEpochBlock = 4400;
+    uint nextEpochBlock = 2200;
+    uint firstEpochNumber = 1;
+    function StakingDeploy() public virtual {
+        STAKING = new RomeStaking(
+            address( ROME ),
+            address( sROME ),
+            epochLength,
+            firstEpochNumber,
+            firstEpochBlock
+        );
+        DISTRIBUTOR = new Distributor(
+            address( TREASURY ),
+            address( ROME ),
+            epochLength,
+            nextEpochBlock
+        );
+        STAKINGHELPER = new StakingHelper( address( STAKING ), address( ROME ) );
+        WARMUP = new StakingWarmup( address( STAKING ), address( sROME ) );
     }
 }
