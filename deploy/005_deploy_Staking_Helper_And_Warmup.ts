@@ -3,6 +3,7 @@ import {DeployFunction} from 'hardhat-deploy/types';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployer} = await hre.getNamedAccounts();
+  const chainId = await hre.getChainId();
   const {deploy,get} = hre.deployments;
 
   const rome = await get('Rome');
@@ -25,17 +26,18 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const stakingHelper = await get('StakingHelper');
 
-  await hre.run("verify:verify", {
-      address: stakingHelper.address,
-      constructorArguments: [staking.address,rome.address],
-  })
-  const stakingWarmup = await get('StakingWarmup');
+  if (chainId == '1285' || chainId == '1287') {
+    await hre.run("verify:verify", {
+        address: stakingHelper.address,
+        constructorArguments: [staking.address,rome.address],
+    })
+    const stakingWarmup = await get('StakingWarmup');
 
-  await hre.run("verify:verify", {
-      address: stakingWarmup.address,
-      constructorArguments: [staking.address, srome.address],
-  })
-
+    await hre.run("verify:verify", {
+        address: stakingWarmup.address,
+        constructorArguments: [staking.address, srome.address],
+    })
+  }
 };
 export default func;
 func.tags = ['StakingHelper','StakingWarmup','STAKING'];

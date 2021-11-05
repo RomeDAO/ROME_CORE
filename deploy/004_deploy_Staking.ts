@@ -4,6 +4,7 @@ import {epochLength, firstEpochBlock, firstEpochNumber} from '../utils/constants
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployer} = await hre.getNamedAccounts();
+  const chainId = await hre.getChainId();
   const {deploy,get} = hre.deployments;
 
   const rome = await get('Rome');
@@ -18,10 +19,12 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const romeStaking = await get('RomeStaking');
 
-  await hre.run("verify:verify", {
-      address: romeStaking.address,
-      constructorArguments: [rome.address, srome.address, epochLength, firstEpochNumber, firstEpochBlock],
-  })
+  if (chainId == '1285' || chainId == '1287') {
+    await hre.run("verify:verify", {
+        address: romeStaking.address,
+        constructorArguments: [rome.address, srome.address, epochLength, firstEpochNumber, firstEpochBlock],
+    })
+  }
 };
 export default func;
 func.tags = ['RomeStaking'];

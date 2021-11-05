@@ -6,6 +6,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deploy,get} = deployments;
 
   const {deployer} = await getNamedAccounts();
+  const chainId = await hre.getChainId();
 
   await deploy('aRome', {
     from: deployer,
@@ -15,9 +16,11 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const arome = await get('aRome');
 
-  await hre.run("verify:verify", {
-      address: arome.address,
-  })
+  if (chainId == '1285' || chainId == '1287') {
+    await hre.run("verify:verify", {
+        address: arome.address,
+    })
+  }
 
 };
 export default func;

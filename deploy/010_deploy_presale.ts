@@ -1,7 +1,7 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
 import {ethers} from 'hardhat';
-import {DAI} from '../utils/constants';
+import {DAI,FRAX} from '../utils/constants';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployer,DAO,WARCHEST} = await hre.getNamedAccounts();
@@ -11,14 +11,17 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const rome = await get('Rome');
   const arome = await get('aRome');
 
-  let dai;
+  let dai,frax;
 
   // moonriver mainnet
   if (chainId == '1285') {
     dai = DAI;
+    frax = FRAX;
   } else {
     const Dai = await get('mockDAI');
     dai = Dai.address;
+    const Frax = await get('mockFRAX');
+    frax = Frax.address;
   }
   await deploy('ClaimHelper', {
     from: deployer,
@@ -31,7 +34,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   await deploy('DaiRomePresale', {
     from: deployer,
-    args: [arome.address, rome.address, dai, DAO, WARCHEST, claimHelper.address],
+    args: [arome.address, rome.address, dai, frax, DAO, WARCHEST, claimHelper.address],
     log: true,
     autoMine: true, // speed up deployment on local network (ganache, hardhat), no effect on live networks
   });
@@ -44,17 +47,19 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   await claimHelper.setPresale(DaiPresale.address);
   await claimHelper.transferOwnership( DAO );
 
-  await hre.run("verify:verify", {
-      address: claimHelper.address,
-      constructorArguments: [rome.address,DAO],
-  })
+  if (chainId == '1285' || chainId == '1287') {
+    await hre.run("verify:verify", {
+        address: claimHelper.address,
+        constructorArguments: [rome.address,DAO],
+    })
 
-  const presale = await get('DaiRomePresale');
+    const presale = await get('DaiRomePresale');
 
-  await hre.run("verify:verify", {
-      address: presale.address,
-      constructorArguments: [arome.address, rome.address, dai, DAO, WARCHEST, claimHelper.address],
-  })
+    await hre.run("verify:verify", {
+        address: presale.address,
+        constructorArguments: [arome.address, rome.address, dai, DAO, WARCHEST, claimHelper.address],
+    })
+  }
 
 };
 export default func;

@@ -271,7 +271,6 @@ contract RomeTreasury is Ownable {
         address _DAI,
         address _MIM,
         address _FRAX,
-        address _WMOVR,
         address _ROMEFRAX,
         address _bondCalculator,
         uint _blocksNeededForQueue
@@ -287,9 +286,6 @@ contract RomeTreasury is Ownable {
 
         isReserveToken[ _FRAX ] = true;
         reserveTokens.push( _FRAX );
-
-        isReserveToken[ _WMOVR ] = true;
-        reserveTokens.push( _WMOVR );
 
         isLiquidityToken[ _ROMEFRAX ] = true;
         liquidityTokens.push( _ROMEFRAX );

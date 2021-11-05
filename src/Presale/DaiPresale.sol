@@ -27,8 +27,9 @@ contract DaiRomePresale is Ownable {
         bool claimed; // True if a team member has claimed ROME
     }
 
-    // Tokens to raise (DAI) and for offer (aROME) which can be swapped for (ROME)
-    IERC20 public DAI;
+    // Tokens to raise (DAI) & (FRAX) and for offer (aROME) which can be swapped for (ROME)
+    IERC20 public DAI; // for user deposits
+    IERC20 public FRAX; // for team deposits
     IERC20 public aROME;
     IERC20 public ROME;
 
@@ -40,7 +41,8 @@ contract DaiRomePresale is Ownable {
 
     uint256 public cap = 2000 * 1e18; // 2000 DAI cap per whitelisted user
 
-    uint256 public totalRaised; // total DAI raised by sale
+    uint256 public totalRaisedDAI; // total DAI raised by sale
+    uint256 public totalRaisedFRAX; // total FRAX raised by sale
 
     uint256 public totalDebt; // total aROME and thus ROME owed to users
 
@@ -77,6 +79,7 @@ contract DaiRomePresale is Ownable {
         address _aROME,
         address _ROME,
         address _DAI,
+        address _FRAX,
         address _DAO,
         address _WARCHEST,
         address _claimHelper
@@ -87,6 +90,8 @@ contract DaiRomePresale is Ownable {
         ROME = IERC20(_ROME);
         require( _DAI != address(0) );
         DAI = IERC20(_DAI);
+        require( _FRAX != address(0) );
+        FRAX = IERC20(_FRAX);
         require( _DAO != address(0) );
         DAO = _DAO;
         require( _WARCHEST != address(0) );
@@ -220,7 +225,7 @@ contract DaiRomePresale is Ownable {
             );
 
         user.amount = user.amount.add(_amount);
-        totalRaised = totalRaised.add(_amount);
+        totalRaisedDAI = totalRaisedDAI.add(_amount);
 
         uint payout = _amount.mul(1e18).div(price).div(1e9); // aROME to mint for _amount
 
@@ -235,8 +240,8 @@ contract DaiRomePresale is Ownable {
         emit Deposit(msg.sender, _amount);
     }
     /**
-     *  @notice it deposits DAI for the sale
-     *  @param _amount: amount of DAI to deposit to sale (18 decimals)
+     *  @notice it deposits FRAX for the sale
+     *  @param _amount: amount of FRAX to deposit to sale (18 decimals)
      *  @dev only for team members
      */
     function depositTeam(uint256 _amount) external {
@@ -252,7 +257,7 @@ contract DaiRomePresale is Ownable {
             );
 
         team.amount = team.amount.add(_amount);
-        totalRaised = totalRaised.add(_amount);
+        totalRaisedFRAX = totalRaisedFRAX.add(_amount);
 
         uint payout = _amount.mul(1e18).div(price).div(1e9); // ROME debt to claim
 
@@ -260,7 +265,7 @@ contract DaiRomePresale is Ownable {
 
         totalDebt = totalDebt.add(payout);
 
-        DAI.safeTransferFrom( msg.sender, DAO, _amount );
+        FRAX.safeTransferFrom( msg.sender, DAO, _amount );
 
         IAlphaRome( address(aROME) ).mint( WARCHEST, payout );
 

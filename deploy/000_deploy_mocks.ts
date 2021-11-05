@@ -24,12 +24,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       autoMine: true, // speed up deployment on local network (ganache, hardhat), no effect on live networks
     });
 
-    await deploy('mockWMOVR', {
-      from: deployer,
-      log: true,
-      autoMine: true, // speed up deployment on local network (ganache, hardhat), no effect on live networks
-    });
-
     await deploy('mockDAI', {
       from: deployer,
       log: true,

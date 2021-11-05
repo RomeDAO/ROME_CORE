@@ -87,7 +87,7 @@ abstract contract RomeTest is DSTest {
 
     function setUp() public virtual {
         // Moonriver deployments
-        WMOVR = IERC20(0x98878B06940aE243284CA214f92Bb71a2b032B8A);
+        // WMOVR = IERC20(0x98878B06940aE243284CA214f92Bb71a2b032B8A);
         MIM = IERC20(0x0caE51e1032e8461f4806e26332c030E34De3aDb);
         FRAX = IERC20(0x1A93B23281CC1CDE4C4741353F3064709A16197d);
         DAI = IERC20(0x80A16016cC4A2E6a2CACA8a4a498b1699fF0f844);
@@ -118,6 +118,7 @@ abstract contract RomeTest is DSTest {
             address( aROME ),
             address( ROME ),
             address( DAI ),
+            address( FRAX ),
             address( DAO ),
             address( WARCHEST ),
             address( CLAIMHELPER )
@@ -138,7 +139,6 @@ abstract contract RomeTest is DSTest {
             address( DAI ),
             address( MIM ),
             address( FRAX ),
-            address( WMOVR ),
             ROMEFRAX,
             address( CALCULATOR ),
             6400 // 1 DAY timelock

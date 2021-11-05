@@ -3,6 +3,7 @@ import {DeployFunction} from 'hardhat-deploy/types';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
+  const chainId = await hre.getChainId();
   const {deploy,get} = deployments;
 
   const {deployer} = await getNamedAccounts();
@@ -13,9 +14,12 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     autoMine: true, // speed up deployment on local network (ganache, hardhat), no effect on live networks
   });
   const Rome = await get('Rome');
-  await hre.run("verify:verify", {
-      address: Rome.address,
-  })
+
+  if (chainId == '1285' || chainId == '1287') {
+    await hre.run("verify:verify", {
+        address: Rome.address,
+    })
+  }
 };
 export default func;
 func.tags = ['Rome'];

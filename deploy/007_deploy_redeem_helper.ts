@@ -17,10 +17,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const redeemHelper = await ethers.getContract('RedeemHelper');
 
-  await hre.run("verify:verify", {
-      address: redeemHelper.address,
-  })
-
   const FraxBonds = await get('FRAXBondDepository');
   await redeemHelper.addBondContract(FraxBonds.address);
 
@@ -33,6 +29,12 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   if (chainId == '1285' || chainId == '1287') {
     const MovrBonds = await get('MOVRBondDepository');
     await redeemHelper.addBondContract(MovrBonds.address);
+  }
+
+  if (chainId == '1285' || chainId == '1287') {
+    await hre.run("verify:verify", {
+        address: redeemHelper.address,
+    })
   }
 };
 export default func;

@@ -6,6 +6,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deploy,get} = deployments;
 
   const {deployer} = await getNamedAccounts();
+  const chainId = await hre.getChainId();
 
   const rome = await get('Rome');
 
@@ -18,10 +19,11 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const calculator = await get('RomeBondingCalculator');
 
-  await hre.run("verify:verify", {
-      address: calculator.address,
-  })
-
+  if (chainId == '1285' || chainId == '1287') {
+    await hre.run("verify:verify", {
+        address: calculator.address,
+    })
+  }
 };
 export default func;
 func.tags = ['RomeBondingCalculator'];
