@@ -180,9 +180,9 @@ abstract contract RomeTest is DSTest {
     StakingWarmup WARMUP;
 
     uint epochLength = 2200;
-    uint firstEpochBlock = 4400;
+    uint firstEpochBlock = 2200;
     uint nextEpochBlock = 2200;
-    uint firstEpochNumber = 1;
+    uint firstEpochNumber = 0;
     function StakingDeploy() public virtual {
         STAKING = new RomeStaking(
             address( ROME ),

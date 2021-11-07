@@ -1,11 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity 0.7.5;
 
-import "@openzeppelin/contracts@v3.4.2-solc-0.7/token/ERC20/SafeERC20.sol";
-import "@openzeppelin/contracts@v3.4.2-solc-0.7/accessOwnable.sol";
+import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 
-// import '../Libraries/Ownable.sol';
-// import '../Libraries/SafeERC20.sol';
+import "@openzeppelin/contracts/access/Ownable.sol";
 
 interface IAlphaRome {
     function mint(address account_, uint256 amount_) external;

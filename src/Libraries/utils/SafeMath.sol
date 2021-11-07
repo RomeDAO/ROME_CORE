@@ -1,7 +1,8 @@
-// SPDX-License-Identifier: GPL-3.0
-pragma solidity 0.7.5;
+// SPDX-License-Identifier: MIT
 
-/**
+pragma solidity ^0.7.0;
+
+/*
  * @dev Wrappers over Solidity's arithmetic operations with added overflow
  * checks.
  *
@@ -210,7 +211,6 @@ library SafeMath {
         require(b > 0, errorMessage);
         return a % b;
     }
-
     function sqrrt(uint256 a) internal pure returns (uint c) {
         if (a > 3) {
             c = a;

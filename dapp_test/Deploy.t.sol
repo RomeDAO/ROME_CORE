@@ -14,6 +14,12 @@ contract Deployment is RomeTest {
 
     function testDeploy() public {
         emit log_named_address('ROMEFRAX @', ROMEFRAX);
+        string memory name = ROME.name();
+        uint8 dec = ROME.decimals();
+        string memory symbol = ROME.symbol();
+        emit log(name);
+        emit log_uint(uint(dec));
+        emit log(symbol);
         fail();
     }
 }
