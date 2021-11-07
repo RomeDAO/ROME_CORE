@@ -21,7 +21,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const distibutor = await get('Distributor');
 
-  if (chainId == '1285' || chainId == '1287') {
+  if (chainId == '1285') {
     await hre.run("verify:verify", {
         address: distibutor.address,
         constructorArguments: [staking.address, srome.address],

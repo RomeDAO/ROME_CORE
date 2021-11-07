@@ -77,7 +77,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     autoMine: true, // speed up deployment on local network (ganache, hardhat), no effect on live networks
   });
 
-  if (chainId == '1285' || chainId == '1287') {
+  if (chainId == '1285') {
     const fraxBonds = await get('FRAXBondDepository');
 
     await hre.run("verify:verify", {

@@ -19,7 +19,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const calculator = await get('RomeBondingCalculator');
 
-  if (chainId == '1285' || chainId == '1287') {
+  if (chainId == '1285') {
     await hre.run("verify:verify", {
         address: calculator.address,
     })

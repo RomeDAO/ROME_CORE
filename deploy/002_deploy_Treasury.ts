@@ -76,7 +76,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const Treasury = await ethers.getContract('RomeTreasury');
 
-  if (chainId == '1285' || chainId == '1287') {
+  if (chainId == '1285') {
     await hre.run("verify:verify", {
         address: Treasury.address,
         constructorArguments: [rome.address, dai, mim, frax, romefrax, calculator.address, '6400'],

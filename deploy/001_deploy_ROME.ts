@@ -15,7 +15,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   });
   const Rome = await get('Rome');
 
-  if (chainId == '1285' || chainId == '1287') {
+  if (chainId == '1285') {
     await hre.run("verify:verify", {
         address: Rome.address,
     })

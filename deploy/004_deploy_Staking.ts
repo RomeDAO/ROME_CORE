@@ -19,7 +19,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const romeStaking = await get('RomeStaking');
 
-  if (chainId == '1285' || chainId == '1287') {
+  if (chainId == '1285') {
     await hre.run("verify:verify", {
         address: romeStaking.address,
         constructorArguments: [rome.address, srome.address, epochLength, firstEpochNumber, firstEpochBlock],

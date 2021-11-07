@@ -5,7 +5,8 @@ import '@nomiclabs/hardhat-ethers';
 import 'hardhat-gas-reporter';
 import '@typechain/hardhat';
 import 'solidity-coverage';
-import {node_url, accounts, getChainId} from './utils/network';
+import '@nomiclabs/hardhat-etherscan';
+import {node_url, accounts, getChainId, apiKey} from './utils/network';
 
 // While waiting for hardhat PR: https://github.com/nomiclabs/hardhat/pull/1542
 if (process.env.HARDHAT_FORK) {
@@ -134,6 +135,11 @@ const config: HardhatUserConfig = {
   },
   paths: {
     sources: 'src',
+  },
+  etherscan : {
+    // Your API key for Etherscan
+    // Obtain one at httpsL//etherscan.io/
+    apiKey: apiKey('moonriver')
   },
   gasReporter: {
     currency: 'USD',

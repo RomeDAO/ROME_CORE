@@ -53,3 +53,15 @@ export function getChainId(networkName?: string): number | undefined {
     }
   }
 }
+
+export function apiKey(networkName?: string): string | undefined {
+  if (networkName) {
+    const api = process.env['API_KEY_' + networkName.toUpperCase()];
+    if (api && api !== '') {
+      return api;
+    }
+    if (!api || api === '') {
+      return '';
+    }
+  }
+}

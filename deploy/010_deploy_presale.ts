@@ -47,7 +47,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   await claimHelper.setPresale(DaiPresale.address);
   await claimHelper.transferOwnership( DAO );
 
-  if (chainId == '1285' || chainId == '1287') {
+  if (chainId == '1285') {
     await hre.run("verify:verify", {
         address: claimHelper.address,
         constructorArguments: [rome.address,DAO],
