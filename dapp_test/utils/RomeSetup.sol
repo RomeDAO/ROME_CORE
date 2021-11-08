@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.7.5;
 
-import "./test.sol";
+import "../../lib/ds-test/test.sol";
 import "./Hevm.sol";
 import '../Interfaces/IFactory.sol';
 import '../Interfaces/IRouter.sol';
@@ -39,7 +39,19 @@ contract Ops {
 }
 
 contract RomeUser {
-    constructor() {
+
+    DaiRomePresale public PRESALE;
+
+    IERC20 public DAI;
+
+    constructor(DaiRomePresale _PRESALE, IERC20 _DAI) {
+        PRESALE = _PRESALE;
+        DAI = _DAI;
+    }
+
+    function deposit(uint _amount) public {
+        DAI.approve(address(PRESALE), _amount);
+        PRESALE.deposit(_amount);
     }
 }
 
@@ -97,10 +109,6 @@ abstract contract RomeTest is DSTest {
 
         sROME = new sRome();
 
-        for (uint i = 0; i < numberUsers; i++) {
-            user.push( new RomeUser() );
-            team.push( new RomeTeam() );
-        }
         DAO = new Dao();
         WARCHEST = new Warchest();
         OPS = new Ops();
@@ -120,6 +128,7 @@ abstract contract RomeTest is DSTest {
             address( WARCHEST ),
             address( CLAIMHELPER )
         );
+        aROME.setPresale(address( PRESALE ));
     }
 
 
@@ -199,5 +208,29 @@ abstract contract RomeTest is DSTest {
         );
         STAKINGHELPER = new StakingHelper( address( STAKING ), address( ROME ) );
         WARMUP = new StakingWarmup( address( STAKING ), address( sROME ) );
+    }
+
+    function setMIMBalance(address account, uint256 amount) public {
+        hevm.store(
+            address( MIM ),
+            keccak256(abi.encode(account, 2)),
+            bytes32(amount)
+        );
+    }
+
+    function setFRAXBalance(address account, uint256 amount) public {
+        hevm.store(
+            address( FRAX ),
+            keccak256(abi.encode(account, 0)),
+            bytes32(amount)
+        );
+    }
+
+    function setDAIBalance(address account, uint256 amount) public {
+        hevm.store(
+            address( DAI ),
+            keccak256(abi.encode(account, 2)),
+            bytes32(amount)
+        );
     }
 }

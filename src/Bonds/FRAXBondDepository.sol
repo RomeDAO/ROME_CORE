@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 pragma solidity 0.7.5;
 
-import '../Libraries/Policy.sol';
+import "../Libraries/Policy.sol";
 
-import '../Libraries/ERC20Permit.sol';
+import "../Libraries/ERC20Permit.sol";
 
-import '../Libraries/SafeERC20.sol';
+import "../Libraries/SafeERC20.sol";
 
-import '../Libraries/utils/FixedPoint.sol';
+import "../Libraries/utils/FixedPoint.sol";
 
 interface ITreasury {
     function deposit( uint _amount, address _token, uint _profit ) external returns ( bool );

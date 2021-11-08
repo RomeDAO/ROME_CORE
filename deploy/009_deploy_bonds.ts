@@ -1,7 +1,7 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
 import {ethers} from 'hardhat';
-import {WMOVR,MIM,FRAX,SOLARFACTORY} from '../utils/constants';
+import {MIM,FRAX,SOLARFACTORY} from '../utils/constants';
 
 import {abi} from '../deployments/moonriver/sushiFactory.json';
 
@@ -10,7 +10,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const chainId = await hre.getChainId();
   const {deploy,get} = hre.deployments;
 
-  let frax,mim,romefrax,feed,solarFactory;
+  let frax,mim,romefrax,solarFactory;
 
   const rome = await get('Rome');
   const treasury = await get('RomeTreasury');

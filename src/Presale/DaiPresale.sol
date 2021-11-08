@@ -38,9 +38,9 @@ contract DaiRomePresale is Ownable {
 
     address public WARCHEST; // Multisig to send team proceeds to
 
-    uint256 public price = 3 * 1e18; // 3 DAI per ROME
+    uint256 public price = 10 * 1e18; // 3 DAI per ROME
 
-    uint256 public cap = 2000 * 1e18; // 2000 DAI cap per whitelisted user
+    uint256 public cap = 1500 * 1e18; // 2000 DAI cap per whitelisted user
 
     uint256 public totalRaisedDAI; // total DAI raised by sale
     uint256 public totalRaisedFRAX; // total FRAX raised by sale
@@ -96,7 +96,7 @@ contract DaiRomePresale is Ownable {
         require( _DAO != address(0) );
         DAO = _DAO;
         require( _WARCHEST != address(0) );
-        DAO = _WARCHEST;
+        WARCHEST = _WARCHEST;
         require( _claimHelper != address(0) );
         claimHelper = _claimHelper;
     }
