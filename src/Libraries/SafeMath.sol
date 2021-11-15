@@ -211,6 +211,7 @@ library SafeMath {
         require(b > 0, errorMessage);
         return a % b;
     }
+    // Only used in the  BondingCalculator.sol
     function sqrrt(uint256 a) internal pure returns (uint c) {
         if (a > 3) {
             c = a;

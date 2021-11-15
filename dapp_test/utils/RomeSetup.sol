@@ -5,8 +5,8 @@ import "../../lib/ds-test/test.sol";
 import "./Hevm.sol";
 import '../Interfaces/IFactory.sol';
 import '../Interfaces/IRouter.sol';
-import '../Interfaces/IERC20.sol';
 import "./GenericAccount.sol";
+import "../mocks/mockToken.sol";
 import {RomeBondingCalculator} from "../../src/BondingCalculator.sol";
 import {MIMBondDepository} from "../../src/Bonds/MIMBondDepository.sol";
 import {FRAXBondDepository} from "../../src/Bonds/FRAXBondDepository.sol";
@@ -22,10 +22,42 @@ import {sRome} from "../../src/sRomeERC20.sol";
 import {aRome} from "../../src/aRomeERC20.sol";
 import {DaiRomePresale} from "../../src/Presale/DaiPresale.sol";
 import {ClaimHelper} from "../../src/Presale/ClaimHelper.sol";
+import "../../src/RomeAuthority.sol";
 
 contract Dao {
-    constructor() {
+    RomeTreasury public TREASURY;
+
+    ClaimHelper public CLAIMHELPER;
+
+    function init(RomeTreasury _TREASURY) public {
+        TREASURY = _TREASURY;
     }
+
+    function approve(address _token, address _who, uint _amount) public {
+        IERC20( _token ).approve(_who, _amount);
+    }
+
+    function transfer(address _token, address _who, uint _amount) public {
+        IERC20( _token ).transfer(_who, _amount);
+    }
+
+    function depositVault(uint _amount, address _token, uint _profit) public {
+        TREASURY.deposit(_amount,_token,_profit);
+    }
+
+    function setClaimHelper(ClaimHelper _CLAIMHELPER) public {
+        CLAIMHELPER = _CLAIMHELPER;
+    }
+    function ClaimWithHelper(
+        uint _amountRome,
+        uint _amountToken,
+        uint256 _amountMinRome,
+        uint256 _amountMinToken,
+        address _router,
+        address _token) public {
+        CLAIMHELPER.Claim(_amountRome,_amountToken,_amountMinRome,_amountMinToken,_router,_token);
+    }
+
 }
 
 contract Warchest {
@@ -49,14 +81,38 @@ contract RomeUser {
         DAI = _DAI;
     }
 
+    function approve(address _token, address _who, uint _amount) public {
+        IERC20( _token ).approve(_who, _amount);
+    }
+
     function deposit(uint _amount) public {
         DAI.approve(address(PRESALE), _amount);
         PRESALE.deposit(_amount);
     }
+
+    function withdraw(uint _amount) public {
+        PRESALE.withdraw(_amount);
+    }
+
+    function claimAlphaRome() public {
+        PRESALE.claimAlphaRome();
+    }
 }
 
 contract RomeTeam {
-    constructor() {
+
+    DaiRomePresale public PRESALE;
+
+    IERC20 public FRAX;
+
+    constructor(DaiRomePresale _PRESALE, IERC20 _FRAX) {
+        PRESALE = _PRESALE;
+        FRAX = _FRAX;
+    }
+
+    function depositTeam(uint _amount) public {
+        FRAX.approve(address(PRESALE), _amount);
+        PRESALE.depositTeam(_amount);
     }
 }
 
@@ -64,13 +120,11 @@ abstract contract RomeTest is DSTest {
     Hevm internal constant hevm =
         Hevm(0x7109709ECfa91a80626fF3989D68f67F5b1DD12D);
 
-    IERC20 WMOVR;
+    Mock MIM;
 
-    IERC20 MIM;
+    Mock FRAX;
 
-    IERC20 FRAX;
-
-    IERC20 DAI;
+    Mock DAI;
 
     IRouter solarRouter;
 
@@ -82,28 +136,27 @@ abstract contract RomeTest is DSTest {
 
     sRome sROME;
 
+    RomeAuthority AUTHORITY;
+
     Dao DAO;
 
     Warchest WARCHEST;
 
     Ops OPS;
 
-    uint256 numberUsers = 5;
-
-    RomeUser[] internal user;
-
-    RomeTeam[] internal team;
-
     function setUp() public virtual {
         // Moonriver deployments
         // WMOVR = IERC20(0x98878B06940aE243284CA214f92Bb71a2b032B8A);
-        MIM = IERC20(0x0caE51e1032e8461f4806e26332c030E34De3aDb);
-        FRAX = IERC20(0x1A93B23281CC1CDE4C4741353F3064709A16197d);
-        DAI = IERC20(0x80A16016cC4A2E6a2CACA8a4a498b1699fF0f844);
         solarRouter = IRouter(0xAA30eF758139ae4a7f798112902Bf6d65612045f);
         solarFactory = IFactory(0x049581aEB6Fe262727f290165C29BDAB065a1B68);
 
-        ROME = new Rome();
+        MIM = new Mock("Magic Internet Money", "MIM", 18);
+        FRAX = new Mock("Frax", "FRAX", 18);
+        DAI = new Mock("Dai", "DAI", 18);
+
+        AUTHORITY = new RomeAuthority(address(this), address(this), address(this), address(this));
+
+        ROME = new Rome(address( AUTHORITY ));
 
         aROME = new aRome();
 
@@ -134,20 +187,20 @@ abstract contract RomeTest is DSTest {
 
     RomeTreasury TREASURY;
     RomeBondingCalculator CALCULATOR;
-    address ROMEFRAX;
 
-    function TreasuryDeploy() public virtual {
+    function TreasuryDeploy(address _romeFrax) public virtual {
         CALCULATOR = new RomeBondingCalculator( address( ROME ) );
 
-        ROMEFRAX = solarFactory.createPair( address( ROME ), address( FRAX ) );
+        // address ROMEFRAX = solarFactory.createPair( address( ROME ), address( FRAX ) );
 
         TREASURY = new RomeTreasury(
             address( ROME ),
             address( DAI ),
             address( MIM ),
             address( FRAX ),
-            ROMEFRAX,
+            _romeFrax,
             address( CALCULATOR ),
+            address( DAO ),
             6400 // 1 DAY timelock
         );
     }
@@ -210,27 +263,27 @@ abstract contract RomeTest is DSTest {
         WARMUP = new StakingWarmup( address( STAKING ), address( sROME ) );
     }
 
-    function setMIMBalance(address account, uint256 amount) public {
-        hevm.store(
-            address( MIM ),
-            keccak256(abi.encode(account, 2)),
-            bytes32(amount)
-        );
-    }
+    // function setMIMBalance(address account, uint256 amount) public {
+    //     hevm.store(
+    //         address( MIM ),
+    //         keccak256(abi.encode(account, 2)),
+    //         bytes32(amount)
+    //     );
+    // }
 
-    function setFRAXBalance(address account, uint256 amount) public {
-        hevm.store(
-            address( FRAX ),
-            keccak256(abi.encode(account, 0)),
-            bytes32(amount)
-        );
-    }
+    // function setFRAXBalance(address account, uint256 amount) public {
+    //     hevm.store(
+    //         address( FRAX ),
+    //         keccak256(abi.encode(account, 0)),
+    //         bytes32(amount)
+    //     );
+    // }
 
-    function setDAIBalance(address account, uint256 amount) public {
-        hevm.store(
-            address( DAI ),
-            keccak256(abi.encode(account, 2)),
-            bytes32(amount)
-        );
-    }
+    // function setDAIBalance(address account, uint256 amount) public {
+    //     hevm.store(
+    //         address( DAI ),
+    //         keccak256(abi.encode(account, 2)),
+    //         bytes32(amount)
+    //     );
+    // }
 }

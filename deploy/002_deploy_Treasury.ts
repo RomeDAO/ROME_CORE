@@ -6,7 +6,7 @@ import {FRAX, MIM, DAI, SOLARFACTORY} from '../utils/constants';
 import {abi} from '../deployments/moonriver/sushiFactory.json';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
-  const {deployer} = await hre.getNamedAccounts();
+  const {deployer,DAO} = await hre.getNamedAccounts();
   const chainId = await hre.getChainId();
   const {deploy,get} = hre.deployments;
 
@@ -69,7 +69,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   await deploy('RomeTreasury', {
     from: deployer,
-    args: [rome.address, dai, mim, frax, romefrax, calculator.address, '6400'], // 1 Day timelock
+    args: [rome.address, dai, mim, frax, romefrax, calculator.address, DAO, '6400'], // 1 Day timelock
     log: true,
     autoMine: true, // speed up deployment on local network (ganache, hardhat), no effect on live networks
   });
@@ -79,7 +79,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   if (chainId == '1285') {
     await hre.run("verify:verify", {
         address: Treasury.address,
-        constructorArguments: [rome.address, dai, mim, frax, romefrax, calculator.address, '6400'],
+        constructorArguments: [rome.address, dai, mim, frax, romefrax, calculator.address, DAO, '6400'],
     })
   }
 };

@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 pragma solidity 0.7.5;
 
-import "./Libraries/ERC20Permit.sol";
+import "./types/ERC20Permit.sol";
 
-import "./Libraries/Policy.sol";
+import "./types/Policy.sol";
 
 contract sRome is ERC20Permit, Policy {
 
@@ -49,8 +49,9 @@ contract sRome is ERC20Permit, Policy {
 
     mapping ( address => mapping ( address => uint256 ) ) private _allowedValue;
 
-    constructor() ERC20("Staked Rome", "sROME") {
-        _setupDecimals(9);
+    constructor()
+    ERC20("Staked Rome", "sROME", 9)
+    ERC20Permit("Staked Rome") {
         initializer = msg.sender;
         _totalSupply = INITIAL_FRAGMENTS_SUPPLY;
         _gonsPerFragment = TOTAL_GONS.div(_totalSupply);

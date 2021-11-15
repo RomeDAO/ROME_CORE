@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 pragma solidity 0.7.5;
 
-import "./Libraries/ERC20Permit.sol";
+import "./types/ERC20Permit.sol";
 
-import "./Libraries/Policy.sol";
+import "./types/Policy.sol";
 
 contract PresaleOwned is Policy {
     
@@ -36,9 +36,9 @@ contract aRome is ERC20Permit, PresaleOwned {
 
   using SafeMath for uint256;
 
-    constructor() ERC20("Alpha Rome", "aROME") {
-        _setupDecimals(9);
-    }
+    constructor()
+    ERC20("Alpha Rome", "aROME", 9)
+    ERC20Permit("Alpha Rome"){}
 
     function mint(address account_, uint256 amount_) external onlyPresale() {
         _mint(account_, amount_);

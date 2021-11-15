@@ -61,18 +61,29 @@ contract ClaimHelper is Ownable{
 
     }
 
-    function Claim(uint256 _amountRome, uint256 _amountToken, address _router, address _token) external onlyDAO {
+    function Claim(
+        uint256 _amountRome,
+        uint256 _amountToken,
+        uint256 _amountMinRome,
+        uint256 _amountMinToken,
+        address _router,
+        address _token
+    ) external onlyDAO {
         require( address(DAI_PRESALE) != address(0) );
+        require( _amountMinRome < _amountRome && _amountMinToken < _amountToken, "Min Amount must be smaller than amount desired");
 
         IRouter router = IRouter(_router);
 
+        IERC20( ROME ).safeTransferFrom( msg.sender, address(this), _amountRome);
+        IERC20( _token ).safeTransferFrom( msg.sender, address(this), _amountToken);
+
         require(
-            IERC20( ROME ).balanceOf(msg.sender) >= _amountRome,
-            'msg.sender does not have enough ROME'
+            IERC20( ROME ).balanceOf(address(this)) >= _amountRome,
+            'not enough ROME'
             );
         require(
-            IERC20( _token ).balanceOf(msg.sender) >= _amountToken,
-            'msg.sender does not have enough FRAX'
+            IERC20( _token ).balanceOf(address(this)) >= _amountToken,
+            'not enough Token'
             );
 
         IERC20( ROME ).approve( address( router ), _amountRome );
@@ -84,8 +95,8 @@ contract ClaimHelper is Ownable{
             _token, // token B
             _amountRome, // amount A Desired (1e9)
             _amountToken, // amount B Desired (1e18)
-            _amountRome, // amount A Min
-            _amountToken, // amount B Min
+            _amountMinRome, // amount A Min
+            _amountMinToken, // amount B Min
             DAO, // to
             block.timestamp // deadline
         );

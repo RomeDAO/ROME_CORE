@@ -1,21 +1,21 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.7.5;
-import "./utils/RomeSetup.sol";
+// import "./utils/RomeSetup.sol";
 
-contract Deployment is RomeTest {
+// contract Deployment is RomeTest {
 
-    function setUp() public virtual override {
-        super.setUp();
+//     function setUp() public virtual override {
+//         super.setUp();
 
-        PresaleDeploy();
+//         PresaleDeploy();
 
-        TreasuryDeploy();
+//         TreasuryDeploy();
 
-        BondsDeploy();
+//         BondsDeploy();
 
-        StakingDeploy();
-    }
+//         StakingDeploy();
+//     }
 
-    function testPresale() public {
-    }
-}
+//     function testPresale() public {
+//     }
+// }

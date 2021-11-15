@@ -7,21 +7,6 @@ async function main() {
   const Staking = await ethers.getContract('RomeStaking');
   const StakingHelper = await ethers.getContract('StakingHelper');
 
-  // WMOVR Bonds
-  const MovrBonds = await ethers.getContract('MOVRBondDepository');
-  await MovrBonds.setStaking( Staking.address, false );
-  await MovrBonds.setStaking( StakingHelper.address, true );
-  // await MovrBonds.initializeBondTerms(
-  //   bcv,
-  //   33100,
-  //   minimumPrice,
-  //   maxPayout,
-  //   10000,
-  //   maxDebt,
-  //   initialDebt
-  //  );
-  await MovrBonds.pushPolicy( OPS );
-
   // ROME/FRAX Bonds
   const RomeFraxBonds = await ethers.getContract('ROMEFRAXBondDepository');
   await RomeFraxBonds.setStaking( Staking.address, false );

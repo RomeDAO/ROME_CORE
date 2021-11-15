@@ -51,17 +51,17 @@ const config: HardhatUserConfig = {
     DAO: {
       default: 2,
       // Moonriver
-      1285: '',
+      1285: '0xD4a7FEbD52efda82d6f8acE24908aE0aa5b4f956',
     },
     OPS: {
       default: 3,
       // Moonriver
-      1285: '',
+      1285: '0x37BA0A3a0Fd8a190a8D661bB681454e01A937A62',
     },
     WARCHEST: {
       default: 4,
       // Moonriver
-      1285: '',
+      1285: '0xc0D66988b67f1EA0F27BEAB7ca1DC7c142D76EA9',
     }
   },
   networks: {

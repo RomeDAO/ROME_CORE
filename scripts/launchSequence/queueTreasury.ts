@@ -16,12 +16,12 @@ async function main() {
   const MimBonds = await ethers.getContract('MIMBondDepository');
 
   // queue reserve depositor toggle for bonds and DAO
-  await Treasury.toggle( '0', FraxBonds.address, zeroAddress );
-  await Treasury.toggle( '0', MimBonds.address, zeroAddress );
+  await Treasury.queue( '0', FraxBonds.address );
+  await Treasury.queue( '0', MimBonds.address );
   // queue liquidity depositor toggle for bonds
-  await Treasury.toggle( '4', RomeFraxBonds.address, zeroAddress );
+  await Treasury.queue( '4', RomeFraxBonds.address );
   // queue reserve depositor toggle for distributor
-  await Treasury.toggle( '8', Distributor.address, zeroAddress );
+  await Treasury.queue( '8', Distributor.address );
 }
 main()
   .then(() => process.exit(0))

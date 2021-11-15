@@ -1,13 +1,15 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 pragma solidity 0.7.5;
 
-import '../Libraries/Policy.sol';
+import "../types/Policy.sol";
 
-import '../Libraries/ERC20Permit.sol';
+import "../types/ERC20Permit.sol";
 
-import '../Libraries/SafeERC20.sol';
+import "../libraries/SafeERC20.sol";
 
-import '../Libraries/utils/FixedPoint.sol';
+import "../libraries/FixedPoint.sol";
+
+import "../interfaces/IERC20Metadata.sol";
 
 interface ITreasury {
     function deposit( uint _amount, address _token, uint _profit ) external returns ( bool );
@@ -440,7 +442,7 @@ contract MIMBondDepository is Policy {
         if( isLiquidityBond ) {
             price_ = bondPrice().mul( IBondCalculator( bondCalculator ).markdown( principle ) ).div( 100 );
         } else {
-            price_ = bondPrice().mul( 10 ** IERC20( principle ).decimals() ).div( 100 );
+            price_ = bondPrice().mul( 10 ** IERC20Metadata( principle ).decimals() ).div( 100 );
         }
     }
 

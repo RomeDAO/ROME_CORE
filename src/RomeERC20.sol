@@ -1,80 +1,34 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-pragma solidity 0.7.5;
+pragma solidity ^0.7.5;
 
-import "./Libraries/ERC20Permit.sol";
+import "./interfaces/IROME.sol";
 
-import "./Libraries/Policy.sol";
+import "./types/ERC20Permit.sol";
 
-contract VaultOwned is Policy {
-    
-  address internal _vault;
+import "./types/RomeAccessControlled.sol";
 
-  function setVault( address vault_ ) external onlyPolicy() returns ( bool ) {
-    _vault = vault_;
-
-    return true;
-  }
-
-  /**
-   * @dev Returns the address of the current vault.
-   */
-  function vault() public view returns (address) {
-    return _vault;
-  }
-
-  /**
-   * @dev Throws if called by any account other than the vault.
-   */
-  modifier onlyVault() {
-    require( _vault == msg.sender, "VaultOwned: caller is not the Vault" );
-    _;
-  }
-
-}
-
-contract Rome is ERC20Permit, VaultOwned {
-
+contract Rome is ERC20Permit, IROME, RomeAccessControlled {
   using SafeMath for uint256;
 
-    constructor() ERC20("Rome", "ROME"){
-        _setupDecimals(9);
-    }
+    constructor(address _authority)
+    ERC20("Rome", "ROME", 9)
+    ERC20Permit("Rome")
+    RomeAccessControlled(IRomeAuthority(_authority)) {}
 
-    function mint(address account_, uint256 amount_) external onlyVault() {
+    function mint(address account_, uint256 amount_) external override onlyVault {
         _mint(account_, amount_);
     }
 
-    /**
-     * @dev Destroys `amount` tokens from the caller.
-     *
-     * See {ERC20-_burn}.
-     */
-    function burn(uint256 amount) public virtual {
+    function burn(uint256 amount) external override {
         _burn(msg.sender, amount);
     }
 
-    /*
-     * @dev Destroys `amount` tokens from `account`, deducting from the caller's
-     * allowance.
-     *
-     * See {ERC20-_burn} and {ERC20-allowance}.
-     *
-     * Requirements:
-     *
-     * - the caller must have allowance for ``accounts``'s tokens of at least
-     * `amount`.
-     */
-     
-    function burnFrom(address account_, uint256 amount_) public virtual {
+    function burnFrom(address account_, uint256 amount_) external override {
         _burnFrom(account_, amount_);
     }
 
-    function _burnFrom(address account_, uint256 amount_) public virtual {
-        uint256 decreasedAllowance_ =
-            allowance(account_, msg.sender).sub(
-                amount_,
-                "ERC20: burn amount exceeds allowance"
-            );
+    function _burnFrom(address account_, uint256 amount_) internal {
+        uint256 decreasedAllowance_ = allowance(account_, msg.sender).sub(amount_, "ERC20: burn amount exceeds allowance");
 
         _approve(account_, msg.sender, decreasedAllowance_);
         _burn(account_, amount_);

@@ -2,9 +2,9 @@
 
 pragma solidity 0.7.5;
 
-import './Libraries/SafeERC20.sol';
+import './libraries/SafeERC20.sol';
 
-import './Libraries/Policy.sol';
+import './types/Policy.sol';
 
 
 interface ITreasury {

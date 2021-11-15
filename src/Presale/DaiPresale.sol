@@ -15,7 +15,6 @@ contract DaiRomePresale is Ownable {
 
     struct UserInfo {
         uint256 amount; // Amount DAI deposited by user
-        uint256 payout; // total aROME paid out
         uint256 debt; // total ROME claimed thus aROME debt
         bool claimed; // True if a user has claimed ROME
     }
@@ -23,7 +22,6 @@ contract DaiRomePresale is Ownable {
     struct TeamInfo {
         uint256 numWhitelist; // number of whitelists
         uint256 amount; // Amout DAI deposited by team
-        uint256 payout; // total aROME paid out
         uint256 debt; // total ROME claimed thus aROME debt
         bool claimed; // True if a team member has claimed ROME
     }
@@ -38,9 +36,9 @@ contract DaiRomePresale is Ownable {
 
     address public WARCHEST; // Multisig to send team proceeds to
 
-    uint256 public price = 10 * 1e18; // 3 DAI per ROME
+    uint256 public price = 20 * 1e18; // 10 DAI per ROME
 
-    uint256 public cap = 1500 * 1e18; // 2000 DAI cap per whitelisted user
+    uint256 public cap = 1500 * 1e18; // 1500 DAI cap per whitelisted user
 
     uint256 public totalRaisedDAI; // total DAI raised by sale
     uint256 public totalRaisedFRAX; // total FRAX raised by sale
@@ -216,7 +214,7 @@ contract DaiRomePresale is Ownable {
     function deposit(uint256 _amount) external {
         require(started, 'Sale has not started');
         require(!ended, 'Sale has ended');
-        require(whitelisted[msg.sender] == true, 'msg.sender is not whitelisted');
+        require(whitelisted[msg.sender] == true, 'msg.sender is not whitelisted user');
 
         UserInfo storage user = userInfo[msg.sender];
 
@@ -229,8 +227,6 @@ contract DaiRomePresale is Ownable {
         totalRaisedDAI = totalRaisedDAI.add(_amount);
 
         uint payout = _amount.mul(1e18).div(price).div(1e9); // aROME to mint for _amount
-
-        user.payout = user.payout.add(payout); // tally up aROME payed out to user
 
         totalDebt = totalDebt.add(payout);
 
@@ -248,7 +244,7 @@ contract DaiRomePresale is Ownable {
     function depositTeam(uint256 _amount) external {
         require(started, 'Sale has not started');
         require(!ended, 'Sale has ended');
-        require(whitelistedTeam[msg.sender] == true, 'msg.sender is not whitelisted');
+        require(whitelistedTeam[msg.sender] == true, 'msg.sender is not whitelisted team');
 
         TeamInfo storage team = teamInfo[msg.sender];
 
@@ -261,8 +257,6 @@ contract DaiRomePresale is Ownable {
         totalRaisedFRAX = totalRaisedFRAX.add(_amount);
 
         uint payout = _amount.mul(1e18).div(price).div(1e9); // ROME debt to claim
-
-        team.payout = team.payout.add(payout); // tally up ROME debt
 
         totalDebt = totalDebt.add(payout);
 
@@ -317,6 +311,6 @@ contract DaiRomePresale is Ownable {
         aROME.safeTransfer( msg.sender, payout );
 
         emit Withdraw(address(aROME),msg.sender, payout);
-
     }
+
 }

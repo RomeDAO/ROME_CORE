@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 pragma solidity 0.7.5;
 
-import "./Libraries/SafeERC20.sol";
+import "./libraries/SafeERC20.sol";
 
-import "./Libraries/Policy.sol";
+import "./types/Policy.sol";
 
 interface IsROME {
     function rebase( uint256 romeProfit_, uint epoch_) external returns (uint256);

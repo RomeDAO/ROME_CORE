@@ -1,9 +1,11 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 pragma solidity 0.7.5;
 
-import './Libraries/SafeERC20.sol';
+import './libraries/SafeERC20.sol';
 
-import './Libraries/Policy.sol';
+import './types/Policy.sol';
+
+import "./interfaces/IERC20Metadata.sol";
 
 interface IROMEERC20 {
     function burnFrom(address account_, uint256 amount_) external;
@@ -88,6 +90,7 @@ contract RomeTreasury is Policy {
         address _FRAX,
         address _ROMEFRAX,
         address _bondCalculator,
+        address _DAO,
         uint _blocksNeededForQueue
     ) {
         require( _ROME != address(0) );
@@ -105,6 +108,9 @@ contract RomeTreasury is Policy {
         isLiquidityToken[ _ROMEFRAX ] = true;
         liquidityTokens.push( _ROMEFRAX );
         bondCalculator[ _ROMEFRAX ] = _bondCalculator;
+
+        isReserveDepositor[ _DAO ] = true;
+        reserveDepositors.push(_DAO);
 
         blocksNeededForQueue = _blocksNeededForQueue;
     }
@@ -292,7 +298,7 @@ contract RomeTreasury is Policy {
     function valueOf( address _token, uint _amount ) public view returns ( uint value_ ) {
         if ( isReserveToken[ _token ] ) {
             // convert amount to match ROME decimals
-            value_ = _amount.mul( 10 ** IERC20( ROME ).decimals() ).div( 10 ** IERC20( _token ).decimals() );
+            value_ = _amount.mul( 10 ** IERC20Metadata( ROME ).decimals() ).div( 10 ** IERC20Metadata( _token ).decimals() );
         } else if ( isLiquidityToken[ _token ] ) {
             value_ = IBondCalculator( bondCalculator[ _token ] ).valuation( _token, _amount );
         }

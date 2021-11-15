@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0
-pragma solidity 0.7.5;
+pragma solidity >=0.7.5;
 
-import "../Interfaces/IERC20.sol";
-import "./utils/SafeMath.sol";
-import "./utils/Address.sol";
+import "../interfaces/IERC20.sol";
+import "./SafeMath.sol";
+import "./Address.sol";
 
 /**
  * @title SafeERC20

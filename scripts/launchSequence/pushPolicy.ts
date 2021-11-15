@@ -4,22 +4,22 @@ async function main() {
   const {DAO,OPS} = await getNamedAccounts();
 
   const sROME = await ethers.getContract('sRome');
-  await sROME.pushManagement( DAO );
+  await sROME.pushPolicy( DAO );
 
   const Staking = await ethers.getContract('RomeStaking');
-  await Staking.pushManagement( OPS );
+  await Staking.pushPolicy( OPS );
 
   const Treasury = await ethers.getContract('RomeTreasury');
   await Treasury.pushPolicy( DAO );
 
   const ROME = await ethers.getContract('Rome');
-  await ROME.pushManagement( DAO );
+  await ROME.pushPolicy( DAO );
 
   const Distributor = await ethers.getContract('Distributor');
   await Distributor.pushPolicy( DAO );
 
   const RedeemHelper = await ethers.getContract('RedeemHelper');
-  await RedeemHelper.pushManagement( OPS );
+  await RedeemHelper.pushPolicy( OPS );
 }
 main()
   .then(() => process.exit(0))
