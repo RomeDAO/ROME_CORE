@@ -18,18 +18,9 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   await auth.pushVault(deployer,true);
 
-  await deploy('ClaimHelper', {
-    from: deployer,
-    args: [rome.address,DAO],
-    log: true,
-    autoMine: true, // speed up deployment on local network (ganache, hardhat), no effect on live networks
-  });
-
-  const claimHelper = await ethers.getContract('ClaimHelper');
-
   await deploy('DaiRomePresale', {
     from: deployer,
-    args: [arome.address, rome.address, dai.address, frax.address, DAO, WARCHEST, claimHelper.address],
+    args: [arome.address, rome.address, dai.address, frax.address, DAO, WARCHEST, deployer],
     log: true,
     autoMine: true, // speed up deployment on local network (ganache, hardhat), no effect on live networks
   });
