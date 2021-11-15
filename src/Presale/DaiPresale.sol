@@ -36,7 +36,7 @@ contract DaiRomePresale is Ownable {
 
     address public WARCHEST; // Multisig to send team proceeds to
 
-    uint256 public price = 20 * 1e18; // 10 DAI per ROME
+    uint256 public price = 20 * 1e18; // 20 DAI per ROME
 
     uint256 public cap = 1500 * 1e18; // 1500 DAI cap per whitelisted user
 
