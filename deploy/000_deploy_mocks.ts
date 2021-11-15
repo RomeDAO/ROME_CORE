@@ -31,7 +31,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     });
 
   }
-  if(chainId !== '1285' && chainId !== '1287') {
+  if(chainId !== '1285') {
     await deploy('mockFactory', {
       from: deployer,
       log: true,
