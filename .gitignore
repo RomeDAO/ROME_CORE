@@ -24,3 +24,5 @@ deployments/localhost
 /pass
 
 /.sethrc
+
+/deployments/junk

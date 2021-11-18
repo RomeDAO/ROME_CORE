@@ -2,8 +2,12 @@ import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
 import {ethers} from 'hardhat';
 
+function delay(ms: number) {
+    return new Promise( resolve => setTimeout(resolve, ms) );
+}
+
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
-  const {deployer,DAO,WARCHEST} = await hre.getNamedAccounts();
+  const {deployer,DAO} = await hre.getNamedAccounts();
   const {deploy,get} = hre.deployments;
 
   const rome = await ethers.getContract('Rome');
@@ -16,19 +20,21 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const auth = await ethers.getContract('RomeAuthority');
 
-  await auth.pushVault(deployer,true);
-
-  await deploy('DaiRomePresale', {
+  await deploy('mockPresale', {
     from: deployer,
-    args: [arome.address, rome.address, dai.address, frax.address, DAO, WARCHEST, deployer],
+    args: [arome.address, rome.address, dai.address, frax.address, DAO, deployer],
     log: true,
     autoMine: true, // speed up deployment on local network (ganache, hardhat), no effect on live networks
   });
 
-  const DaiPresale = await ethers.getContract('DaiRomePresale');
+  const DaiPresale = await ethers.getContract('mockPresale');
+
+  await delay(1000);
+
+  await auth.pushVault(deployer,true);
 
   await arome.setPresale(DaiPresale.address);
 };
 export default func;
-func.tags = ['mockClaimHelper','mockDaiRomePresale','mockPRESALE'];
-func.dependencies = ['aRome', 'Mocks'];
+func.tags = ['mockPresale'];
+func.dependencies = ['aRome', 'Mocks','Rome'];

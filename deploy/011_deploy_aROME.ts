@@ -6,6 +6,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deploy,get} = deployments;
 
   const {deployer} = await getNamedAccounts();
+
   const chainId = await hre.getChainId();
 
   await deploy('aRome', {
@@ -14,13 +15,13 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     autoMine: true, // speed up deployment on local network (ganache, hardhat), no effect on live networks
   });
 
-  const arome = await get('aRome');
+  // const arome = await get('aRome');
 
-  if (chainId == '1285') {
-    await hre.run("verify:verify", {
-        address: arome.address,
-    })
-  }
+  // if (chainId == '1285') {
+  //   await hre.run("verify:verify", {
+  //       address: arome.address,
+  //   })
+  // }
 
 };
 export default func;

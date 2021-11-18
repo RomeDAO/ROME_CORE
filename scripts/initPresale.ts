@@ -1,24 +1,24 @@
 import {getNamedAccounts,ethers} from 'hardhat';
 
+function delay(ms: number) {
+    return new Promise( resolve => setTimeout(resolve, ms) );
+}
+
 async function main() {
   const {DAO} = await getNamedAccounts();
 
   // get contracts
   const aROME = await ethers.getContract('aRome');
   const Presale = await ethers.getContract('DaiRomePresale');
-  const Treasury = await ethers.getContract('RomeTreasury');
-  const ClaimHelper = await ethers.getContract('ClaimHelper');
-  const Authority = await ethers.getContract('RomeAuthority');
-
-  // Authority
-  await Authority.pushVault( Treasury.address, true);
 
   // aROME
+  console.log('aRome.SetPresale()');
   await aROME.setPresale( Presale.address );
+  console.log('txSent');
+  await delay(15000);
+  console.log('aRome.pushPolicy()');
   await aROME.pushPolicy( DAO );
-
-  // ClaimHelper
-  await ClaimHelper.setPresale( Presale.address );
+  console.log('txSent');
 
 }
 main()

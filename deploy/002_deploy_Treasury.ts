@@ -41,9 +41,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     mim = await get('mockMIM');
     mim = mim.address;
 
-    solarFactory = await ethers.getContractAt(abi,'0xf84186b18c2Cc2354ce1aa8A5F9aCd763AA5a096');
+    const sushiFactory = await ethers.getContractAt(abi,'0xc35DADB65012eC5796536bD9864eD8773aBc74C4');
 
-    romefrax = await solarFactory.callStatic.createPair(rome.address,frax);
+    romefrax = await sushiFactory.callStatic.createPair(rome.address,frax);
+
 
   } else {
 

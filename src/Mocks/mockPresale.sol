@@ -9,7 +9,7 @@ interface IAlphaRome {
     function mint(address account_, uint256 amount_) external;
 }
 
-contract DaiRomePresale is Ownable {
+contract mockPresale is Ownable {
     using SafeERC20 for IERC20;
     using SafeMath for uint256;
 
@@ -34,8 +34,6 @@ contract DaiRomePresale is Ownable {
 
     address public DAO; // Multisig treasury to send proceeds to
 
-    address public WARCHEST; // Multisig to send team proceeds to
-
     uint256 public price = 20 * 1e18; // 20 DAI per ROME
 
     uint256 public cap = 1500 * 1e18; // 1500 DAI cap per whitelisted user
@@ -53,7 +51,7 @@ contract DaiRomePresale is Ownable {
 
     bool public claimAlpha; // true when aROME is claimable
 
-    bool public contractPaused; // circuit breaker
+    address public claimHelper; // address of claimingHelper contract
 
     mapping(address => UserInfo) public userInfo;
 
@@ -65,14 +63,14 @@ contract DaiRomePresale is Ownable {
 
     mapping(address => uint256) public romeClaimable; // amount of rome claimable by address
 
-    event Deposit(address indexed who, uint256 amount);
-    event Withdraw(address token, address indexed who, uint256 amount);
-    event Mint(address token, address indexed who, uint256 amount);
-    event SaleStarted(uint256 block);
-    event SaleEnded(uint256 block);
-    event ClaimUnlocked(uint256 block);
-    event ClaimAlphaUnlocked(uint256 block);
-    event AdminWithdrawal(address token, uint256 amount);
+    event Deposit(address indexed who, uint amount);
+    event Withdraw(address token, address indexed who, uint amount);
+    event Mint(address token, address indexed who, uint amount);
+    event SaleStarted(uint block);
+    event SaleEnded(uint block);
+    event ClaimUnlocked(uint block);
+    event ClaimAlphaUnlocked(uint block);
+    event AdminWithdrawal(address token, uint amount, address indexed admin);
 
     constructor(
         address _aROME,
@@ -80,7 +78,7 @@ contract DaiRomePresale is Ownable {
         address _DAI,
         address _FRAX,
         address _DAO,
-        address _WARCHEST
+        address _claimHelper
     ) {
         require( _aROME != address(0) );
         aROME = IERC20(_aROME);
@@ -92,15 +90,10 @@ contract DaiRomePresale is Ownable {
         FRAX = IERC20(_FRAX);
         require( _DAO != address(0) );
         DAO = _DAO;
-        require( _WARCHEST != address(0) );
-        WARCHEST = _WARCHEST;
+        require( _claimHelper != address(0) );
+        claimHelper = _claimHelper;
     }
 
-    //* @notice modifer to check if contract is paused
-    modifier checkIfPaused() {
-        require(contractPaused == false, "contract is paused");
-        _;
-    }
     /**
      *  @notice adds a single whitelist to the sale
      *  @param _address: address to whitelist
@@ -116,8 +109,7 @@ contract DaiRomePresale is Ownable {
      */
     function addMultipleWhitelist(address[] calldata _addresses) external onlyOwner {
         require(!started, "Sale has already started");
-        require(_addresses.length <= 333,"too many addresses");
-        for (uint256 i = 0; i < _addresses.length; i++) {
+        for (uint i = 0; i < _addresses.length; i++) {
             whitelisted[_addresses[i]] = true;
         }
     }
@@ -152,6 +144,11 @@ contract DaiRomePresale is Ownable {
         delete teamInfo[_address];
     }
 
+    // @notice It sets claim helper address
+    function setClaimHelper(address _claimHelper) external onlyOwner {
+        claimHelper = _claimHelper;
+    }
+
     // @notice Starts the sale
     function start() external onlyOwner {
         require(!started, "Sale has already started");
@@ -177,6 +174,16 @@ contract DaiRomePresale is Ownable {
         emit ClaimUnlocked(block.number);
     }
 
+    // @notice lets users claim ROME
+    // @dev send sufficient ROME before calling
+    function claimUnlockWithHelper() external {
+        require(msg.sender == claimHelper, "msg.sender is not claimHelper");
+        require(ended, "Sale has not ended");
+        require(!claimable, "Claim has already been unlocked");
+        require(ROME.balanceOf(address(this)) >= totalDebt, 'not enough ROME in contract');
+        claimable = true;
+        emit ClaimUnlocked(block.number);
+    }
 
     // @notice lets users claim aROME
     function claimAlphaUnlock() external onlyOwner {
@@ -185,27 +192,21 @@ contract DaiRomePresale is Ownable {
         claimAlpha = true;
         emit ClaimAlphaUnlocked(block.number);
     }
-
-    // @notice lets owner pause contract
-    function togglePause() external onlyOwner returns (bool){
-        contractPaused = !contractPaused;
-        return contractPaused;
-    }
     /**
      *  @notice transfer ERC20 token to DAO multisig
      *  @param _token: token address to withdraw
      *  @param _amount: amount of token to withdraw
      */
     function AdminWithdraw(address _token, uint256 _amount) external onlyOwner {
-        IERC20( _token ).safeTransfer( address(msg.sender), _amount );
-        emit AdminWithdrawal(_token, _amount);
+        IERC20( _token ).safeTransfer( DAO, _amount );
+        emit AdminWithdrawal(_token, _amount, DAO);
     }
 
     /**
      *  @notice it deposits DAI for the sale
      *  @param _amount: amount of DAI to deposit to sale (18 decimals)
      */
-    function deposit(uint256 _amount) external checkIfPaused {
+    function deposit(uint256 _amount) external {
         require(started, 'Sale has not started');
         require(!ended, 'Sale has ended');
         require(whitelisted[msg.sender] == true, 'msg.sender is not whitelisted user');
@@ -220,7 +221,7 @@ contract DaiRomePresale is Ownable {
         user.amount = user.amount.add(_amount);
         totalRaisedDAI = totalRaisedDAI.add(_amount);
 
-        uint256 payout = _amount.mul(1e18).div(price).div(1e9); // aROME to mint for _amount
+        uint payout = _amount.mul(1e18).div(price).div(1e9); // aROME to mint for _amount
 
         totalDebt = totalDebt.add(payout);
 
@@ -235,7 +236,7 @@ contract DaiRomePresale is Ownable {
      *  @param _amount: amount of FRAX to deposit to sale (18 decimals)
      *  @dev only for team members
      */
-    function depositTeam(uint256 _amount) external checkIfPaused {
+    function depositTeam(uint256 _amount) external {
         require(started, 'Sale has not started');
         require(!ended, 'Sale has ended');
         require(whitelistedTeam[msg.sender] == true, 'msg.sender is not whitelisted team');
@@ -250,13 +251,13 @@ contract DaiRomePresale is Ownable {
         team.amount = team.amount.add(_amount);
         totalRaisedFRAX = totalRaisedFRAX.add(_amount);
 
-        uint256 payout = _amount.mul(1e18).div(price).div(1e9); // ROME debt to claim
+        uint payout = _amount.mul(1e18).div(price).div(1e9); // ROME debt to claim
 
         totalDebt = totalDebt.add(payout);
 
         FRAX.safeTransferFrom( msg.sender, DAO, _amount );
 
-        IAlphaRome( address(aROME) ).mint( WARCHEST, payout );
+        IAlphaRome( address(aROME) ).mint( DAO, payout );
 
         emit Deposit(msg.sender, _amount);
     }
@@ -265,7 +266,7 @@ contract DaiRomePresale is Ownable {
      *  @notice it deposits aROME to withdraw ROME from the sale
      *  @param _amount: amount of aROME to deposit to sale (9 decimals)
      */
-    function withdraw(uint256 _amount) external checkIfPaused {
+    function withdraw(uint256 _amount) external {
         require(claimable, 'ROME is not yet claimable');
         require(_amount > 0, '_amount must be greater than zero');
 
@@ -284,12 +285,12 @@ contract DaiRomePresale is Ownable {
     }
 
     // @notice it checks a users DAI allocation remaining
-    function getUserRemainingAllocation(address _user) external view returns ( uint256 ) {
+    function getUserRemainingAllocation(address _user) external view returns ( uint ) {
         UserInfo memory user = userInfo[_user];
         return cap.sub(user.amount);
     }
     // @notice it claims aROME back from the sale
-    function claimAlphaRome() external checkIfPaused {
+    function claimAlphaRome() external {
         require(claimAlpha, 'aROME is not yet claimable');
 
         UserInfo storage user = userInfo[msg.sender];

@@ -68,7 +68,7 @@ contract Whitelist is RomeTest {
     }
 }
 
-contract Deposit is RomeTest {
+contract Logic is RomeTest {
     using SafeMath for uint;
 
     uint256 numberUsers = 5;
@@ -219,9 +219,6 @@ contract Deposit is RomeTest {
         amount = amount % (PRESALE.cap());
         user[0].deposit(amount);
         PRESALE.end();
-        TREASURY.queue(RomeTreasury.MANAGING.RESERVEDEPOSITOR,address( DAO ));
-        hevm.roll(block.number.add(6400));
-        TREASURY.toggle(RomeTreasury.MANAGING.RESERVEDEPOSITOR,address( DAO ), address(0));
 
         DAO.approve(address( DAI ), address( TREASURY ), amount);
         DAO.depositVault(amount,address( DAI ),0);
@@ -248,10 +245,6 @@ contract Deposit is RomeTest {
             user[i].deposit(amount);
         }
         PRESALE.end();
-
-        TREASURY.queue(RomeTreasury.MANAGING.RESERVEDEPOSITOR,address( DAO ));
-        hevm.roll(block.number.add(6400));
-        TREASURY.toggle(RomeTreasury.MANAGING.RESERVEDEPOSITOR,address( DAO ), address(0));
 
         DAO.approve(address( DAI ), address( TREASURY ), PRESALE.totalRaisedDAI());
         DAO.depositVault(PRESALE.totalRaisedDAI(),address( DAI ),0);
@@ -299,10 +292,6 @@ contract Deposit is RomeTest {
         }
         PRESALE.end();
 
-        TREASURY.queue(RomeTreasury.MANAGING.RESERVEDEPOSITOR,address( DAO ));
-        hevm.roll(block.number.add(6400));
-        TREASURY.toggle(RomeTreasury.MANAGING.RESERVEDEPOSITOR,address( DAO ), address(0));
-
         DAO.approve(address( DAI ), address( TREASURY ), PRESALE.totalRaisedDAI());
         DAO.depositVault(PRESALE.totalRaisedDAI(),address( DAI ),0);
         DAO.transfer(address( ROME ),address( PRESALE ), PRESALE.totalDebt());
@@ -338,10 +327,6 @@ contract Deposit is RomeTest {
         }
         PRESALE.end();
 
-        TREASURY.queue(RomeTreasury.MANAGING.RESERVEDEPOSITOR,address( DAO ));
-        hevm.roll(block.number.add(6400));
-        TREASURY.toggle(RomeTreasury.MANAGING.RESERVEDEPOSITOR,address( DAO ), address(0));
-
         DAO.approve(address( DAI ), address( TREASURY ), PRESALE.totalRaisedDAI());
         DAO.depositVault(PRESALE.totalRaisedDAI(),address( DAI ),0);
         DAO.transfer(address( ROME ),address( PRESALE ), PRESALE.totalDebt());
@@ -359,5 +344,13 @@ contract Deposit is RomeTest {
         assertTrue(PRESALE.claimable());
         assertGe(ROME.balanceOf(address( ROMEDAI )),amountRome);
         assertGe(DAI.balanceOf(address( ROMEDAI )),amountDai);
+    }
+
+    function testGetUserRemainingAllocation() external {
+        uint256 amtToDeposit = 100 * 1e18;
+        PRESALE.start();
+        user[0].deposit(amtToDeposit);
+        uint256 remaining = PRESALE.getUserRemainingAllocation(address(user[0]));
+        assertEq(remaining, PRESALE.cap().sub(amtToDeposit));
     }
 }

@@ -25,16 +25,16 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   });
   const Rome = await get('Rome');
 
-  if (chainId == '1285') {
-    await hre.run("verify:verify", {
-        address: authority.address,
-        constructorArguments: [deployer,DAO,OPS,zeroAddress],
-    })
-    await hre.run("verify:verify", {
-        address: Rome.address,
-        constructorArguments: [authority.address],
-    })
-  }
+  // if (chainId == '1285') {
+  //   await hre.run("verify:verify", {
+  //       address: authority.address,
+  //       constructorArguments: [deployer,DAO,OPS,zeroAddress],
+  //   })
+  //   await hre.run("verify:verify", {
+  //       address: Rome.address,
+  //       constructorArguments: [authority.address],
+  //   })
+  // }
 };
 export default func;
 func.tags = ['Rome'];
