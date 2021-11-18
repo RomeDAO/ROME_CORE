@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.7.5;
 import "./utils/RomeSetup.sol";
-import '../src/libraries/SafeMath.sol';
+import "../src/libraries/SafeMath.sol";
 
 contract Whitelist is RomeTest {
 
@@ -262,16 +262,15 @@ contract Logic is RomeTest {
 
     function testAdminWithdraw(uint amount) external {
         if ( amount >= 1e36 || amount <= 1e18 ) return;
-
         FRAX.mint(address( PRESALE ), amount);
-        PRESALE.AdminWithdraw(address( FRAX ),amount);
-        assertEq(FRAX.balanceOf(address( DAO )), amount);
+        PRESALE.adminWithdraw(address( FRAX ), amount);
+        assertEq(FRAX.balanceOf(address( this )), amount);
     }
 
     function testCannotAdminWithdrawWithoutAccess() external {
         PRESALE.transferOwnership(address(1));
         try
-            PRESALE.AdminWithdraw(address(1),1*1e18)
+            PRESALE.adminWithdraw(address(1),1*1e18)
         {fail();} catch Error(string memory error) {
             assertEq(error,'Ownable: caller is not the owner');
         }
@@ -311,39 +310,6 @@ contract Logic is RomeTest {
         }
 
         assertEq(aROME.balanceOf(address(PRESALE)), 0);
-    }
-
-    function testCanClaimUnlockWithHelper() external {
-        address ROMEDAI = solarFactory.createPair( address( ROME ), address( DAI ) );
-        TreasuryDeploy(ROMEDAI);
-        AUTHORITY.pushVault(address(TREASURY), true);
-        DAO.init( TREASURY );
-        DAO.setClaimHelper(CLAIMHELPER);
-        CLAIMHELPER.setPresale(address( PRESALE ));
-
-        PRESALE.start();
-        for ( uint i = 0; i < numberUsers; i++) {
-            user[i].deposit(1000*1e18);
-        }
-        PRESALE.end();
-
-        DAO.approve(address( DAI ), address( TREASURY ), PRESALE.totalRaisedDAI());
-        DAO.depositVault(PRESALE.totalRaisedDAI(),address( DAI ),0);
-        DAO.transfer(address( ROME ),address( PRESALE ), PRESALE.totalDebt());
-
-        // List at 100$, 10% slippage
-        uint amountDai = 10000*1e18;
-        uint amountRome = 100*1e9;
-        uint amountDaiMin = 9000*1e18;
-        uint amountRomeMin = 90*1e9;
-        DAI.mint(address( DAO ), amountDai);
-        DAO.approve(address( ROME ), address( CLAIMHELPER ), amountRome);
-        DAO.approve(address( DAI ), address( CLAIMHELPER ), amountDai);
-        DAO.ClaimWithHelper(amountRome,amountDai,amountRomeMin,amountDaiMin,address( solarRouter ),address( DAI ));
-
-        assertTrue(PRESALE.claimable());
-        assertGe(ROME.balanceOf(address( ROMEDAI )),amountRome);
-        assertGe(DAI.balanceOf(address( ROMEDAI )),amountDai);
     }
 
     function testGetUserRemainingAllocation() external {

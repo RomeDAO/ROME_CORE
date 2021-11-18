@@ -26,3 +26,4 @@ deployments/localhost
 /.sethrc
 
 /deployments/junk
+.DS_Store
