@@ -346,7 +346,7 @@ contract Logic is RomeTest {
         user[0].deposit(amount);
 
         // assert successful deposit after unpausing contract
-        assertEq(DAI.balanceOf(address( PRESALE) )), amount);
+        assertEq(DAI.balanceOf(address( DAO ) ), amount);
 
         PRESALE.end();
 
@@ -375,7 +375,7 @@ contract Logic is RomeTest {
         assertEq(ROME.balanceOf(address( user[0] )), bal);
         assertEq(ROME.balanceOf(address( PRESALE )), 0);
 
-        // assert aRome transferedd to PRESALE contract after contract unpaused
+        // assert aRome transfered to PRESALE contract after contract unpaused
         assertEq(aROME.balanceOf(address( PRESALE )), bal);
         assertEq(aROME.balanceOf(address( user[0] )), 0);
     }
