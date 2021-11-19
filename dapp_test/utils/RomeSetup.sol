@@ -3,8 +3,8 @@ pragma solidity 0.7.5;
 
 import "../../lib/ds-test/test.sol";
 import "./Hevm.sol";
-import '../Interfaces/IFactory.sol';
-import '../Interfaces/IRouter.sol';
+import '../interfaces/IFactory.sol';
+import '../interfaces/IRouter.sol';
 import "./GenericAccount.sol";
 import "../mocks/mockToken.sol";
 import {RomeBondingCalculator} from "../../src/BondingCalculator.sol";
