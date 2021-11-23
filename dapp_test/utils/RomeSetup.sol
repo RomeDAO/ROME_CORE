@@ -3,8 +3,8 @@ pragma solidity 0.7.5;
 
 import "../../lib/ds-test/test.sol";
 import "./Hevm.sol";
-import '../Interfaces/IFactory.sol';
-import '../Interfaces/IRouter.sol';
+import '../interfaces/IFactory.sol';
+import '../interfaces/IRouter.sol';
 import "./GenericAccount.sol";
 import "../mocks/mockToken.sol";
 import {RomeBondingCalculator} from "../../src/BondingCalculator.sol";
@@ -21,13 +21,10 @@ import {Rome} from "../../src/RomeERC20.sol";
 import {sRome} from "../../src/sRomeERC20.sol";
 import {aRome} from "../../src/aRomeERC20.sol";
 import {DaiRomePresale} from "../../src/Presale/DaiPresale.sol";
-import {ClaimHelper} from "../../src/Presale/ClaimHelper.sol";
 import "../../src/RomeAuthority.sol";
 
 contract Dao {
     RomeTreasury public TREASURY;
-
-    ClaimHelper public CLAIMHELPER;
 
     function init(RomeTreasury _TREASURY) public {
         TREASURY = _TREASURY;
@@ -43,19 +40,6 @@ contract Dao {
 
     function depositVault(uint _amount, address _token, uint _profit) public {
         TREASURY.deposit(_amount,_token,_profit);
-    }
-
-    function setClaimHelper(ClaimHelper _CLAIMHELPER) public {
-        CLAIMHELPER = _CLAIMHELPER;
-    }
-    function ClaimWithHelper(
-        uint _amountRome,
-        uint _amountToken,
-        uint256 _amountMinRome,
-        uint256 _amountMinToken,
-        address _router,
-        address _token) public {
-        CLAIMHELPER.Claim(_amountRome,_amountToken,_amountMinRome,_amountMinToken,_router,_token);
     }
 
 }
@@ -167,19 +151,16 @@ abstract contract RomeTest is DSTest {
         OPS = new Ops();
     }
 
-    ClaimHelper CLAIMHELPER;
     DaiRomePresale PRESALE;
 
     function PresaleDeploy() public virtual {
-        CLAIMHELPER = new ClaimHelper( address( ROME ), address( DAO ) );
         PRESALE = new DaiRomePresale(
             address( aROME ),
             address( ROME ),
             address( DAI ),
             address( FRAX ),
             address( DAO ),
-            address( WARCHEST ),
-            address( CLAIMHELPER )
+            address( WARCHEST )
         );
         aROME.setPresale(address( PRESALE ));
     }

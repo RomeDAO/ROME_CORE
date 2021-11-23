@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.7.5;
 import "./utils/RomeSetup.sol";
-import '../src/libraries/SafeMath.sol';
+import "../src/libraries/SafeMath.sol";
 
 contract Whitelist is RomeTest {
 
@@ -103,6 +103,7 @@ contract Logic is RomeTest {
             assertEq(error,'Sale has not started');
         }
     }
+
     function testCannotDepositAfterEnd() external {
         PRESALE.start();
         PRESALE.end();
@@ -112,6 +113,7 @@ contract Logic is RomeTest {
             assertEq(error,'Sale has ended');
         }
     }
+
     function testCannotDepositIfNotWhitelisted() external {
         PRESALE.removeWhitelist(address(user[0]));
         PRESALE.start();
@@ -121,6 +123,7 @@ contract Logic is RomeTest {
             assertEq(error,'msg.sender is not whitelisted user');
         }
     }
+
     function testCannotDepositTeamIfNotWhitelisted() external {
         PRESALE.removeTeam(address(team[0]));
         PRESALE.start();
@@ -130,6 +133,7 @@ contract Logic is RomeTest {
             assertEq(error,'msg.sender is not whitelisted team');
         }
     }
+
     function testCannotDepositOverCap() external {
         PRESALE.start();
         user[0].deposit(1500*1e18);
@@ -139,6 +143,7 @@ contract Logic is RomeTest {
             assertEq(error,'new amount above user limit');
         }
     }
+
     function testCannotDepositTeamOverCap() external {
         PRESALE.start();
         team[0].depositTeam(3*1500*1e18);
@@ -148,6 +153,7 @@ contract Logic is RomeTest {
             assertEq(error,'new amount above team limit');
         }
     }
+
     function testDeposits(uint _amount) external {
         PRESALE.start();
         address addr;
@@ -256,22 +262,22 @@ contract Logic is RomeTest {
             uint bal = aROME.balanceOf(address(user[i]));
             user[i].approve(address( aROME ), address( PRESALE ), bal);
             user[i].withdraw(bal);
+            assertEq(ROME.balanceOf(address(user[i])), bal);
         }
         assertEq(ROME.balanceOf(address(PRESALE)), 0);
     }
 
     function testAdminWithdraw(uint amount) external {
         if ( amount >= 1e36 || amount <= 1e18 ) return;
-
         FRAX.mint(address( PRESALE ), amount);
-        PRESALE.AdminWithdraw(address( FRAX ),amount);
-        assertEq(FRAX.balanceOf(address( DAO )), amount);
+        PRESALE.adminWithdraw(address( FRAX ), amount);
+        assertEq(FRAX.balanceOf(address( this )), amount);
     }
 
     function testCannotAdminWithdrawWithoutAccess() external {
         PRESALE.transferOwnership(address(1));
         try
-            PRESALE.AdminWithdraw(address(1),1*1e18)
+            PRESALE.adminWithdraw(address(1),1*1e18)
         {fail();} catch Error(string memory error) {
             assertEq(error,'Ownable: caller is not the owner');
         }
@@ -313,44 +319,64 @@ contract Logic is RomeTest {
         assertEq(aROME.balanceOf(address(PRESALE)), 0);
     }
 
-    function testCanClaimUnlockWithHelper() external {
-        address ROMEDAI = solarFactory.createPair( address( ROME ), address( DAI ) );
-        TreasuryDeploy(ROMEDAI);
-        AUTHORITY.pushVault(address(TREASURY), true);
-        DAO.init( TREASURY );
-        DAO.setClaimHelper(CLAIMHELPER);
-        CLAIMHELPER.setPresale(address( PRESALE ));
-
-        PRESALE.start();
-        for ( uint i = 0; i < numberUsers; i++) {
-            user[i].deposit(1000*1e18);
-        }
-        PRESALE.end();
-
-        DAO.approve(address( DAI ), address( TREASURY ), PRESALE.totalRaisedDAI());
-        DAO.depositVault(PRESALE.totalRaisedDAI(),address( DAI ),0);
-        DAO.transfer(address( ROME ),address( PRESALE ), PRESALE.totalDebt());
-
-        // List at 100$, 10% slippage
-        uint amountDai = 10000*1e18;
-        uint amountRome = 100*1e9;
-        uint amountDaiMin = 9000*1e18;
-        uint amountRomeMin = 90*1e9;
-        DAI.mint(address( DAO ), amountDai);
-        DAO.approve(address( ROME ), address( CLAIMHELPER ), amountRome);
-        DAO.approve(address( DAI ), address( CLAIMHELPER ), amountDai);
-        DAO.ClaimWithHelper(amountRome,amountDai,amountRomeMin,amountDaiMin,address( solarRouter ),address( DAI ));
-
-        assertTrue(PRESALE.claimable());
-        assertGe(ROME.balanceOf(address( ROMEDAI )),amountRome);
-        assertGe(DAI.balanceOf(address( ROMEDAI )),amountDai);
-    }
-
     function testGetUserRemainingAllocation() external {
         uint256 amtToDeposit = 100 * 1e18;
         PRESALE.start();
         user[0].deposit(amtToDeposit);
         uint256 remaining = PRESALE.getUserRemainingAllocation(address(user[0]));
         assertEq(remaining, PRESALE.cap().sub(amtToDeposit));
+    }
+
+    function testContractPause() external {
+        TreasuryDeploy(address(1));
+        AUTHORITY.pushVault(address(TREASURY), true);
+        DAO.init( TREASURY );
+        PRESALE.start();
+        uint amount = PRESALE.cap();
+
+        // DEPOSIT
+        PRESALE.togglePause(); // pause contract
+        try
+            user[0].deposit(amount)
+        {fail();} catch Error(string memory error) {
+            emit log(error);
+            assertEq(error,'contract is paused');
+        }
+        PRESALE.togglePause();  // unpause contract
+        user[0].deposit(amount);
+
+        // assert successful deposit after unpausing contract
+        assertEq(DAI.balanceOf(address( DAO ) ), amount);
+
+        PRESALE.end();
+
+        DAO.approve(address( DAI ), address( TREASURY ), PRESALE.totalRaisedDAI());
+        DAO.depositVault(PRESALE.totalRaisedDAI(),address( DAI ),0);
+        DAO.transfer(address( ROME ),address( PRESALE ), PRESALE.totalDebt());
+        PRESALE.claimUnlock();
+
+        uint bal = aROME.balanceOf(address( user[0] ));
+        user[0].approve(address( aROME ), address( PRESALE ), bal);
+
+
+        // WITHDRAWAL
+        PRESALE.togglePause(); // pause contract
+        try
+            user[0].withdraw(bal)
+        {fail();} catch Error(string memory error) {
+            emit log(error);
+            assertEq(error,'contract is paused');
+        }
+        PRESALE.togglePause();
+        user[0].withdraw(bal);
+
+
+        // assert ROME transfered to user address after contract unpaused
+        assertEq(ROME.balanceOf(address( user[0] )), bal);
+        assertEq(ROME.balanceOf(address( PRESALE )), 0);
+
+        // assert aRome transfered to PRESALE contract after contract unpaused
+        assertEq(aROME.balanceOf(address( PRESALE )), bal);
+        assertEq(aROME.balanceOf(address( user[0] )), 0);
     }
 }

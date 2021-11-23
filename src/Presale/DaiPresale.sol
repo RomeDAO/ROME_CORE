@@ -196,7 +196,7 @@ contract DaiRomePresale is Ownable {
      *  @param _token: token address to withdraw
      *  @param _amount: amount of token to withdraw
      */
-    function AdminWithdraw(address _token, uint256 _amount) external onlyOwner {
+    function adminWithdraw(address _token, uint256 _amount) external onlyOwner {
         IERC20( _token ).safeTransfer( address(msg.sender), _amount );
         emit AdminWithdrawal(_token, _amount);
     }
