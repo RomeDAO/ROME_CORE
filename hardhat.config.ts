@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import {HardhatUserConfig} from 'hardhat/types';
-import { task } from "hardhat/config";
-import { Signer } from "@ethersproject/abstract-signer";
+import {task} from 'hardhat/config';
+import {Signer} from '@ethersproject/abstract-signer';
 import 'hardhat-deploy';
 import '@nomiclabs/hardhat-ethers';
 import 'hardhat-gas-reporter';
@@ -10,14 +10,13 @@ import 'solidity-coverage';
 import '@nomiclabs/hardhat-etherscan';
 import {node_url, accounts, getChainId, apiKey} from './utils/network';
 
-task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
+task('accounts', 'Prints the list of accounts', async (taskArgs, hre) => {
   const accounts: Signer[] = await hre.ethers.getSigners();
 
   for (const account of accounts) {
     console.log(await account.getAddress());
   }
 });
-
 
 // While waiting for hardhat PR: https://github.com/nomiclabs/hardhat/pull/1542
 if (process.env.HARDHAT_FORK) {
@@ -27,24 +26,24 @@ if (process.env.HARDHAT_FORK) {
 const config: HardhatUserConfig = {
   solidity: {
     compilers: [
-    {
-      version: '0.6.12',
-      settings: {
-        optimizer: {
-          enabled: true,
-          runs: 9999,
-        }
-      }
-    },
-    {
-      version:'0.7.5',
-      settings: {
-        optimizer: {
-          enabled: true,
-          runs: 9999,
-        }
-      }
-    },
+      {
+        version: '0.6.12',
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 9999,
+          },
+        },
+      },
+      {
+        version: '0.7.5',
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 9999,
+          },
+        },
+      },
       {
         version: '0.8.9',
         settings: {
@@ -73,14 +72,15 @@ const config: HardhatUserConfig = {
       default: 4,
       // Moonriver
       //1285: '0xc0D66988b67f1EA0F27BEAB7ca1DC7c142D76EA9',
-    }
+    },
   },
   networks: {
     hardhat: {
+      chainId: 1337,
       initialBaseFeePerGas: 0, // to fix : https://github.com/sc-forks/solidity-coverage/issues/652, see https://github.com/sc-forks/solidity-coverage/issues/652#issuecomment-896330136
       // process.env.HARDHAT_FORK will specify the network that the fork is made from.
       // this line ensure the use of the corresponding accounts
-      accounts: accounts(process.env.HARDHAT_FORK),
+      accounts: accounts(),
       forking: process.env.HARDHAT_FORK
         ? {
             // TODO once PR merged : network: process.env.HARDHAT_FORK,
@@ -142,15 +142,15 @@ const config: HardhatUserConfig = {
       tags: ['moonbase'],
       gasPrice: 2000000000,
       gas: 8000000,
-    }
+    },
   },
   paths: {
     sources: 'src',
   },
-  etherscan : {
+  etherscan: {
     // Your API key for Etherscan
     // Obtain one at httpsL//etherscan.io/
-    apiKey: apiKey('moonriver')
+    apiKey: apiKey('moonriver'),
   },
   gasReporter: {
     currency: 'USD',
