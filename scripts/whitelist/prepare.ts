@@ -1,5 +1,8 @@
 import {ethers, getNamedAccounts} from 'hardhat';
 
+// prepares whitelist and sets up everything needed
+// useful to test the actual journey in the ui: approve -> deposit
+
 async function main() {
   const {DAO} = await getNamedAccounts();
   const [owner, addr1, addr2, ...addrs] = await ethers.getSigners();
@@ -32,15 +35,8 @@ async function main() {
   // start presale
   const startTx = await presale.start();
   await startTx.wait();
-
-  // approve dai spending
-  const approveTx = await dai.connect(addr1).approve(presale.address, ethers.utils.parseEther('1500'));
-  await approveTx.wait();
-
-  // deposit some DAI and buy some aROME
-  const buyTx = await presale.connect(addr1).deposit(ethers.utils.parseEther('1500'));
-  await buyTx.wait();
 }
+
 main()
   .then(() => process.exit(0))
   .catch((error) => {
