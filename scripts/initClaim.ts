@@ -6,6 +6,7 @@ async function main() {
   const [owner, addr1, addr2, ...addrs] = await ethers.getSigners();
 
   const rome = await ethers.getContract('Rome');
+  const staking = await ethers.getContract('RomeStaking');
   const authority = await ethers.getContract('RomeAuthority');
   const presale = await ethers.getContract('DaiRomePresale');
 
@@ -17,11 +18,14 @@ async function main() {
   const pushTx = await authority.pushVault(addr1.address, true);
   await pushTx.wait();
 
-  const mintTx = await rome.connect(addr1).mint(addr1.address, 1000000000000);
+  const mintTx = await rome.connect(addr1).mint(addr1.address, 3000000000000);
   await mintTx.wait();
 
   const transferTx = await rome.connect(addr1).transfer(presale.address, 1000000000000);
   await transferTx.wait();
+
+  const transferTx2 = await rome.connect(addr1).transfer(staking.address, 1000000000000);
+  await transferTx2.wait();
 
   // ready the presale contract
   const unlockTx = await presale.claimUnlock();

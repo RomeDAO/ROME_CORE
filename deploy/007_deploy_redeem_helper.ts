@@ -5,7 +5,7 @@ import {ethers} from 'hardhat';
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
   const chainId = await hre.getChainId();
-  const {deploy,get} = deployments;
+  const {deploy, get} = deployments;
 
   const {deployer} = await getNamedAccounts();
 
@@ -18,25 +18,29 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const redeemHelper = await ethers.getContract('RedeemHelper');
 
   const FraxBonds = await get('FRAXBondDepository');
-  await redeemHelper.addBondContract(FraxBonds.address);
+  const redeemTx = await redeemHelper.addBondContract(FraxBonds.address);
+  await redeemTx.wait();
 
   const MimBonds = await get('MIMBondDepository');
-  await redeemHelper.addBondContract(MimBonds.address);
+  const redeemTx1 = await redeemHelper.addBondContract(MimBonds.address);
+  await redeemTx1.wait();
 
   const RomeFraxBonds = await get('ROMEFRAXBondDepository');
-  await redeemHelper.addBondContract(RomeFraxBonds.address);
+  const redeemTx2 = await redeemHelper.addBondContract(RomeFraxBonds.address);
+  await redeemTx2.wait();
 
   if (chainId == '1285' || chainId == '1287') {
     const MovrBonds = await get('MOVRBondDepository');
-    await redeemHelper.addBondContract(MovrBonds.address);
+    const tx = await redeemHelper.addBondContract(MovrBonds.address);
+    await tx.wait();
   }
 
   if (chainId == '1285') {
-    await hre.run("verify:verify", {
-        address: redeemHelper.address,
-    })
+    await hre.run('verify:verify', {
+      address: redeemHelper.address,
+    });
   }
 };
 export default func;
-func.tags = ['RedeemHelper','BONDS'];
+func.tags = ['RedeemHelper', 'BONDS'];
 func.dependencies = ['Bonds'];
