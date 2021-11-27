@@ -18,17 +18,21 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const redeemHelper = await ethers.getContract('RedeemHelper');
 
   const FraxBonds = await get('FRAXBondDepository');
-  await redeemHelper.addBondContract(FraxBonds.address);
+  const fraxTx = await redeemHelper.addBondContract(FraxBonds.address);
+  await fraxTx.wait()
 
   const MimBonds = await get('MIMBondDepository');
-  await redeemHelper.addBondContract(MimBonds.address);
+  const mimTx = await redeemHelper.addBondContract(MimBonds.address);
+  await mimTx.wait()
 
   const RomeFraxBonds = await get('ROMEFRAXBondDepository');
-  await redeemHelper.addBondContract(RomeFraxBonds.address);
+  const romeFraxTx = await redeemHelper.addBondContract(RomeFraxBonds.address);
+  await romeFraxTx.wait()
 
   if (chainId == '1285' || chainId == '1287') {
     const MovrBonds = await get('MOVRBondDepository');
-    await redeemHelper.addBondContract(MovrBonds.address);
+    const movrTx = await redeemHelper.addBondContract(MovrBonds.address);
+    await movrTx.wait()
   }
 
   if (chainId == '1285') {
