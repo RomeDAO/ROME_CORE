@@ -9,7 +9,7 @@ export const epochLength = '2200'; // ~8 hours
  * therefore the first rebase will rebase 0 no matter what, the second rebase
  * will distribute the first distribution sent.
  */
-export const firstEpochBlock = '0'; // block.number of first rebase
+export const firstEpochBlock = '200'; // block.number of first rebase
 export const nextEpochBlock = '0'; // first block.number of distribute
 
 // Moonriver Mainnet Addresses
@@ -20,4 +20,3 @@ export const DAI = '0x80A16016cC4A2E6a2CACA8a4a498b1699fF0f844';
 
 export const SOLARFACTORY = '0x049581aEB6Fe262727f290165C29BDAB065a1B68';
 export const SUSHIFACTORY = '0xc35DADB65012eC5796536bD9864eD8773aBc74C4';
-

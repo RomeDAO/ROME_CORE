@@ -1,31 +1,35 @@
-import {getNamedAccounts,ethers} from 'hardhat';
+import {getNamedAccounts, ethers} from 'hardhat';
+import {zeroAddress} from '../utils/constants';
 
-function delay(ms: number) {
-    return new Promise( resolve => setTimeout(resolve, ms) );
-}
-
+// this script mints rome tokens and transfers them to the presale contract so users can try to claim them
 async function main() {
-  const {DAO} = await getNamedAccounts();
+  const [owner, addr1, addr2, ...addrs] = await ethers.getSigners();
 
-  // get contracts
-  const aROME = await ethers.getContract('aRome');
-  const ROME = await ethers.getContract('Rome');
-  const Presale = await ethers.getContract('DaiRomePresale');
+  const rome = await ethers.getContract('Rome');
+  const staking = await ethers.getContract('RomeStaking');
+  const authority = await ethers.getContract('RomeAuthority');
+  const presale = await ethers.getContract('DaiRomePresale');
 
-  // aROME
-  console.log('aRome.SetPresale()');
-  await aROME.setPresale( Presale.address );
-  console.log('txSent');
-  await delay(15000);
-  console.log('aRome.pushPolicy()');
-  await aROME.pushPolicy( DAO );
-  console.log('txSent');
+  // end sale
+  const endTx = await presale.end();
+  await endTx.wait();
 
-  const signer = await ethers.getSigner(DAO);
-  await ROME.connect( signer ).transfer(Presale.address,'100000000000000');
+  // let dev mint rome tokens
+  const pushTx = await authority.pushVault(addr1.address, true);
+  await pushTx.wait();
 
-  
+  const mintTx = await rome.connect(addr1).mint(addr1.address, 3000000000000);
+  await mintTx.wait();
 
+  const transferTx = await rome.connect(addr1).transfer(presale.address, 1000000000000);
+  await transferTx.wait();
+
+  const transferTx2 = await rome.connect(addr1).transfer(staking.address, 1000000000000);
+  await transferTx2.wait();
+
+  // ready the presale contract
+  const unlockTx = await presale.claimUnlock();
+  await unlockTx.wait();
 }
 main()
   .then(() => process.exit(0))

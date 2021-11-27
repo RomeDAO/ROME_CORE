@@ -1,6 +1,6 @@
 import {ethers, getNamedAccounts} from 'hardhat';
 
-// goes through the full whitelist journes
+// goes through the full whitelist journey
 // prepares the whitelist and approves and deposits automatically
 async function main() {
   const {DAO} = await getNamedAccounts();
@@ -23,7 +23,7 @@ async function main() {
   await policyTx.wait();
   console.log('txSent');
 
-  // whitelist user for presal
+  // whitelist user for presale
   const presaleTx = await presale.addMultipleWhitelist([owner.address, addr1.address]);
   await presaleTx.wait();
 
