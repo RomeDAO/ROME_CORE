@@ -15,7 +15,7 @@ async function main() {
   // Staking
   await Staking.setContract('0', Distributor.address);
   await Staking.setContract('1', StakingWarmup.address);
-  await Staking.setWarmup('1');
+  await Staking.setWarmup('0');
 
   // Distributor
   await Distributor.addRecipient(Staking.address, initialRewardRate);

@@ -138,10 +138,17 @@ contract RomeStaking is Policy {
         @param _trigger bool
      */
     function unstake(uint256 _amount, bool _trigger) external {
+        console.log("entering unstaking");
+
         if (_trigger) {
+            console.log("entering rebase trigger");
             rebase();
         }
+
+        console.log("entering transfering sROME");
         IERC20(sROME).safeTransferFrom(msg.sender, address(this), _amount);
+
+        console.log("entering transfering ROME");
         IERC20(ROME).safeTransfer(msg.sender, _amount);
     }
 
@@ -158,6 +165,7 @@ contract RomeStaking is Policy {
      */
     function rebase() public {
         if (epoch.endBlock <= block.number) {
+            console.log("check 1 Staking");
             IsROME(sROME).rebase(epoch.distribute, epoch.number);
 
             epoch.endBlock = epoch.endBlock.add(epoch.length);

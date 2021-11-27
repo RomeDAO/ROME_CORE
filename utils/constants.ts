@@ -1,8 +1,8 @@
 export const zeroAddress = '0x0000000000000000000000000000000000000000';
 export const initialRewardRate = '3000'; // 5000 = 0.5%
 export const startingIndex = '1000000000'; // 1e9, index of 1
-export const firstEpochNumber = '0';
-export const epochLength = '2200'; // ~8 hours
+export const firstEpochNumber = '1';
+export const epochLength = '300'; // ~8 hours
 
 /**
  * @dev rebases come after distribute. Rebases distribute previous distribution
