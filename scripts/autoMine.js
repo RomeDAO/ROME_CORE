@@ -1,11 +1,11 @@
-import {ethers} from 'hardhat';
+const {ethers} = require('hardhat');
 
-const stopMiningAt = 400;
+const stopMiningAt = 600;
 
 const autoMine = async () => {
   let currentBlockNum = await ethers.provider.getBlockNumber();
   while (currentBlockNum <= stopMiningAt) {
-    await ethers.provider.send('evm_setAutomine', [false]);
+    await ethers.provider.send('evm_mine');
     currentBlockNum = await ethers.provider.getBlockNumber();
   }
 

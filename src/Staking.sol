@@ -175,8 +175,12 @@ contract RomeStaking is Policy {
                 IDistributor(distributor).distribute();
             }
 
+            console.log("check 2 Staking");
             uint256 balance = contractBalance();
+            console.log("balance Staking ==> %s", balance);
+            console.log("check 3 Staking");
             uint256 staked = IsROME(sROME).circulatingSupply();
+            console.log("staked Staking ==> %s", balance);
 
             console.log("balance => %s", balance);
             console.log("staked => %s", staked);
