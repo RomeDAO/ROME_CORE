@@ -24,6 +24,8 @@ async function main() {
   const val = await fraxBonds.staking();
   console.log('val', val);
 
+  console.log('addr1', addr1.address);
+
   //   const queueTx = await treasury.queue('0',deployer);
   //   await queueTx.wait()
 

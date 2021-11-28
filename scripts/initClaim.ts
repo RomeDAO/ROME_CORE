@@ -33,18 +33,18 @@ async function main() {
   await depositTx.wait();
 
   // end sale
-  // const endTx = await presale.end();
-  // await endTx.wait();
+  const endTx = await presale.end();
+  await endTx.wait();
 
-  // const transferTx = await rome.connect(addr1).transfer(presale.address, 1000000000000);
-  // await transferTx.wait();
+  const transferTx = await rome.connect(addr1).transfer(presale.address, 1000000000000);
+  await transferTx.wait();
 
-  // const transferTx2 = await rome.connect(addr1).transfer(staking.address, 1000000000000);
-  // await transferTx2.wait();
+  const transferTx2 = await rome.connect(addr1).transfer(staking.address, 1000000000000);
+  await transferTx2.wait();
 
   // ready the presale contract
-  // const unlockTx = await presale.claimUnlock();
-  // await unlockTx.wait();
+  const unlockTx = await presale.claimUnlock();
+  await unlockTx.wait();
 }
 main()
   .then(() => process.exit(0))
