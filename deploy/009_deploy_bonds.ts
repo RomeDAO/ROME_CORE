@@ -4,6 +4,7 @@ import {ethers} from 'hardhat';
 import {MIM,FRAX,SOLARFACTORY} from '../utils/constants';
 
 import {abi} from '../deployments/moonriver/sushiFactory.json';
+import {zeroAddress} from '../utils/constants';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployer,WARCHEST} = await hre.getNamedAccounts();
@@ -56,7 +57,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   // Deploy MIM bonds
   await deploy('MIMBondDepository', {
     from: deployer,
-    args: [rome.address,mim,treasury.address,WARCHEST, calculator.address],
+    args: [rome.address,mim,treasury.address,WARCHEST, zeroAddress],
     log: true,
     autoMine: true, // speed up deployment on local network (ganache, hardhat), no effect on live networks
   });
@@ -64,7 +65,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   // Deploy FRAX bonds
   await deploy('FRAXBondDepository', {
     from: deployer,
-    args: [rome.address,frax,treasury.address,WARCHEST, calculator.address],
+    args: [rome.address,frax,treasury.address,WARCHEST, zeroAddress],
     log: true,
     autoMine: true, // speed up deployment on local network (ganache, hardhat), no effect on live networks
   });
@@ -82,13 +83,13 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
     await hre.run("verify:verify", {
         address: fraxBonds.address,
-        constructorArguments: [rome.address,frax,treasury.address,WARCHEST, calculator.address],
+        constructorArguments: [rome.address,frax,treasury.address,WARCHEST, zeroAddress],
     })
     const mimBonds = await get('MIMBondDepository');
 
     await hre.run("verify:verify", {
         address: mimBonds.address,
-        constructorArguments: [rome.address,mim,treasury.address,WARCHEST, calculator.address],
+        constructorArguments: [rome.address,mim,treasury.address,WARCHEST, zeroAddress],
     })
     const romefraxBonds = await get('ROMEFRAXBondDepository');
 

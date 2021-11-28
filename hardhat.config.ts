@@ -96,7 +96,7 @@ const config: HardhatUserConfig = {
         : undefined,
     },
     localhost: {
-      url: node_url('localhost'),
+      url: "http://0.0.0.0:8545/",
       accounts: accounts(),
     },
     staging: {
