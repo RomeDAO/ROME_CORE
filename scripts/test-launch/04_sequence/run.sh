@@ -1,0 +1,1 @@
+yarn execute localhost ./01_endPresale.ts

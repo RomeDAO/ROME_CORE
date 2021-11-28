@@ -1,5 +1,5 @@
 import {ethers} from 'hardhat';
-import {startingIndex, initialRewardRate} from '../utils/constants';
+import {startingIndex, initialRewardRate} from '../../../utils/constants';
 
 async function main() {
   // get contracts

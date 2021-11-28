@@ -1,0 +1,4 @@
+export const testAddresses = [
+  '0x9Cc0341F2412A9D22CDcd027C6Cc710330c5325e',
+  '0xB9A611EdAcFa796D64B873e4e6B50a86F3d6072E',
+];

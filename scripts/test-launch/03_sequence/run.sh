@@ -1,0 +1,1 @@
+yarn execute localhost ./scripts/test-launch/01_startPresale.ts
