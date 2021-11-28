@@ -1,6 +1,6 @@
 const {ethers} = require('hardhat');
 
-const stopMiningAt = 600;
+const stopMiningAt = 30000;
 
 const autoMine = async () => {
   let currentBlockNum = await ethers.provider.getBlockNumber();

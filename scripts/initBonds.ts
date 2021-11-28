@@ -1,9 +1,9 @@
-import {ethers,getNamedAccounts} from 'hardhat';
-const bcv = 14000
-const minimumPrice = 80000
-const maxDebt = 1000e9
-const initialDebt = 10
-const maxPayout = 1000
+import {ethers, getNamedAccounts} from 'hardhat';
+const bcv = 14000;
+const minimumPrice = 80000;
+const maxDebt = 1000e9;
+const initialDebt = 10;
+const maxPayout = 1000;
 
 async function main() {
   const {OPS} = await getNamedAccounts();
@@ -13,25 +13,10 @@ async function main() {
   const StakingHelper = await ethers.getContract('StakingHelper');
 
   // ROME/FRAX Bonds
-  const RomeFraxBonds = await ethers.getContract('ROMEFRAXBondDepository');
-  await RomeFraxBonds.setStaking( Staking.address, false );
-  await RomeFraxBonds.setStaking( StakingHelper.address, true );
-  await RomeFraxBonds.initializeBondTerms(
-    bcv,
-    33100,
-    minimumPrice,
-    maxPayout,
-    10000,
-    maxDebt,
-    initialDebt
-   );
-  await RomeFraxBonds.pushPolicy( OPS );
-
-  // FRAX Bonds
-  // const FraxBonds = await ethers.getContract('FRAXBondDepository');
-  // await FraxBonds.setStaking( Staking.address, false );
-  // await FraxBonds.setStaking( StakingHelper.address, true );
-  // await FraxBonds.initializeBondTerms(
+  // const RomeFraxBonds = await ethers.getContract('ROMEFRAXBondDepository');
+  // await RomeFraxBonds.setStaking( Staking.address, false );
+  // await RomeFraxBonds.setStaking( StakingHelper.address, true );
+  // await RomeFraxBonds.initializeBondTerms(
   //   bcv,
   //   33100,
   //   minimumPrice,
@@ -40,22 +25,21 @@ async function main() {
   //   maxDebt,
   //   initialDebt
   //  );
-  // await FraxBonds.pushPolicy( OPS );
+  // await RomeFraxBonds.pushPolicy( OPS );
+
+  // FRAX Bonds
+  const FraxBonds = await ethers.getContract('FRAXBondDepository');
+  await FraxBonds.setStaking(Staking.address, false);
+  await FraxBonds.setStaking(StakingHelper.address, true);
+  await FraxBonds.initializeBondTerms(bcv, 33100, minimumPrice, maxPayout, 10000, maxDebt, initialDebt);
+  await FraxBonds.pushPolicy(OPS);
 
   // MIM Bonds
   const MimBonds = await ethers.getContract('MIMBondDepository');
-  await MimBonds.setStaking( Staking.address, false );
-  await MimBonds.setStaking( StakingHelper.address, true );
-  await MimBonds.initializeBondTerms(
-    bcv,
-    33100,
-    minimumPrice,
-    maxPayout,
-    10000,
-    maxDebt,
-    initialDebt
-   );
-  await MimBonds.pushPolicy( OPS );
+  await MimBonds.setStaking(Staking.address, false);
+  await MimBonds.setStaking(StakingHelper.address, true);
+  await MimBonds.initializeBondTerms(bcv, 33100, minimumPrice, maxPayout, 10000, maxDebt, initialDebt);
+  await MimBonds.pushPolicy(OPS);
 }
 main()
   .then(() => process.exit(0))
