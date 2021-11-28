@@ -1,5 +1,5 @@
 import {getNamedAccounts, ethers} from 'hardhat';
-import {zeroAddress} from '../utils/constants';
+import {zeroAddress} from '../../utils/constants';
 
 // this script mints rome tokens and transfers them to the presale contract so users can try to claim them
 async function main() {
@@ -33,6 +33,7 @@ async function main() {
   await depositTx.wait();
 
   // end sale
+  console.log('end presale');
   const endTx = await presale.end();
   await endTx.wait();
 
@@ -43,6 +44,7 @@ async function main() {
   await transferTx2.wait();
 
   // ready the presale contract
+  console.log('unlocking claim on presale');
   const unlockTx = await presale.claimUnlock();
   await unlockTx.wait();
 }
