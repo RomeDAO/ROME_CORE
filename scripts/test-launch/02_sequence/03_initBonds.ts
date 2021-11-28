@@ -1,8 +1,8 @@
 import {ethers, getNamedAccounts} from 'hardhat';
-const bcv = 14000;
+const bcv = 270;
 const minimumPrice = 80000;
-const maxDebt = 1000e9;
-const initialDebt = 10;
+const maxDebt = 5000000 * 1e9;
+const initialDebt = 0;
 const maxPayout = 1000;
 
 async function main() {
@@ -13,19 +13,11 @@ async function main() {
   const StakingHelper = await ethers.getContract('StakingHelper');
 
   // ROME/FRAX Bonds
-  // const RomeFraxBonds = await ethers.getContract('ROMEFRAXBondDepository');
-  // await RomeFraxBonds.setStaking( Staking.address, false );
-  // await RomeFraxBonds.setStaking( StakingHelper.address, true );
-  // await RomeFraxBonds.initializeBondTerms(
-  //   bcv,
-  //   33100,
-  //   minimumPrice,
-  //   maxPayout,
-  //   10000,
-  //   maxDebt,
-  //   initialDebt
-  //  );
-  // await RomeFraxBonds.pushPolicy( OPS );
+  const RomeFraxBonds = await ethers.getContract('ROMEFRAXBondDepository');
+  await RomeFraxBonds.setStaking(Staking.address, false);
+  await RomeFraxBonds.setStaking(StakingHelper.address, true);
+  await RomeFraxBonds.initializeBondTerms(60, 33100, 2220, maxPayout, 10000, maxDebt, initialDebt);
+  await RomeFraxBonds.pushPolicy(OPS);
 
   // FRAX Bonds
   const FraxBonds = await ethers.getContract('FRAXBondDepository');
