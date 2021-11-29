@@ -6,6 +6,7 @@ async function main() {
   const fraxBond = await ethers.getContract('FRAXBondDepository');
   const mim = await ethers.getContract('mockMIM');
   const frax = await ethers.getContract('mockFRAX');
+  const dai = await ethers.getContract('mockDAI');
 
   //   const factory = await ethers.getContract('Uni');
 
@@ -13,6 +14,8 @@ async function main() {
   console.log('mimBond', mimBond.address);
   console.log('frax', frax.address);
   console.log('mim', mim.address);
+
+  console.log('dai total', ethers.utils.formatEther(await dai.totalSupply()));
 }
 
 main()

@@ -30,12 +30,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const redeemTx2 = await redeemHelper.addBondContract(RomeFraxBonds.address);
   await redeemTx2.wait();
 
-  if (chainId == '1285' || chainId == '1287') {
-    const MovrBonds = await get('MOVRBondDepository');
-    const tx = await redeemHelper.addBondContract(MovrBonds.address);
-    await tx.wait();
-  }
-
   if (chainId == '1285') {
     await hre.run('verify:verify', {
       address: redeemHelper.address,

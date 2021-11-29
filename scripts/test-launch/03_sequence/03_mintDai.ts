@@ -18,7 +18,7 @@ async function main() {
   for (const address of addresses) {
     const mintTx = await frax.mint(address, ethers.utils.parseUnits('10000', 18));
     await mintTx.wait();
-    console.log('minted dai for ' + address);
+    console.log('minted frax for ' + address);
   }
 }
 
