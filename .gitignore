@@ -10,7 +10,6 @@ typechain/
 !.vscode/extensions.json.default
 
 node_modules/
-.env
 
 .yalc
 yalc.lock
