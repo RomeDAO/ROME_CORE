@@ -83,7 +83,7 @@ contract ROMEMOVRBondDepository is Policy {
     address public immutable ROME; // token given as payment for bond
     address public immutable principle; // token used to create bond
     address public immutable treasury; // mints ROME when receives principle
-    address public immutable WARCHEST; // receives fee share from bond
+    address public immutable DAO; // receives fee share from bond
 
     address public immutable bondCalculator; // calculates value of LP tokens
 
@@ -109,9 +109,8 @@ contract ROMEMOVRBondDepository is Policy {
     struct Terms {
         uint controlVariable; // scaling variable for price
         uint vestingTerm; // in blocks
-        uint minimumPrice; // vs principle value. 4 decimals (1500 = 0.15)
+        uint minimumPrice; // vs principle value.
         uint maxPayout; // in thousandths of a %. i.e. 500 = 0.5%
-        uint fee; // as % of bond principle, in hundreths. ( 500 = 5% = 0.05 for every 1 paid)]
         uint maxDebt; // 9 decimal debt ratio, max % total supply created as debt
     }
 
@@ -141,7 +140,7 @@ contract ROMEMOVRBondDepository is Policy {
         address _ROME,
         address _principle,
         address _treasury, 
-        address _WARCHEST,
+        address _DAO,
         address _bondCalculator,
         address _feed
     ) {
@@ -151,8 +150,8 @@ contract ROMEMOVRBondDepository is Policy {
         principle = _principle;
         require( _treasury != address(0) );
         treasury = _treasury;
-        require( _WARCHEST != address(0) );
-        WARCHEST = _WARCHEST;
+        require( _DAO != address(0) );
+        DAO = _DAO;
         // bondCalculator should be address(0) if not LP bond
         bondCalculator = _bondCalculator;
         priceFeed = AggregatorV3Interface( _feed );
@@ -172,7 +171,6 @@ contract ROMEMOVRBondDepository is Policy {
         uint _vestingTerm,
         uint _minimumPrice,
         uint _maxPayout,
-        uint _fee,
         uint _maxDebt,
         uint _initialDebt
     ) external onlyPolicy() {
@@ -182,7 +180,6 @@ contract ROMEMOVRBondDepository is Policy {
             vestingTerm: _vestingTerm,
             minimumPrice: _minimumPrice,
             maxPayout: _maxPayout,
-            fee: _fee,
             maxDebt: _maxDebt
         });
         totalDebt = _initialDebt;
@@ -194,7 +191,7 @@ contract ROMEMOVRBondDepository is Policy {
     
     /* ======== POLICY FUNCTIONS ======== */
 
-    enum PARAMETER { VESTING, PAYOUT, FEE, DEBT }
+    enum PARAMETER { VESTING, PAYOUT, DEBT }
     /**
      *  @notice set parameters for new bonds
      *  @param _parameter PARAMETER
@@ -207,10 +204,7 @@ contract ROMEMOVRBondDepository is Policy {
         } else if ( _parameter == PARAMETER.PAYOUT ) { // 1
             require( _input <= 1000, "Payout cannot be above 1 percent" );
             terms.maxPayout = _input;
-        } else if ( _parameter == PARAMETER.FEE ) { // 2
-            require( _input <= 1000, "WARCHEST fee cannot exceed 10 percent" );
-            terms.fee = _input;
-        } else if ( _parameter == PARAMETER.DEBT ) { // 3
+        } else if ( _parameter == PARAMETER.DEBT ) { // 2
             terms.maxDebt = _input;
         }
     }
@@ -228,7 +222,7 @@ contract ROMEMOVRBondDepository is Policy {
         uint _target,
         uint _buffer 
     ) external onlyPolicy() {
-        require( _increment <= terms.controlVariable.mul( 25 ).div( 1000 ), "Increment too large" );
+        require( _increment <= terms.controlVariable.mul( 25 ).div( 1000 ) || _increment == 1, "Increment too large" );
 
         adjustment = Adjust({
             add: _addition,
@@ -276,15 +270,6 @@ contract ROMEMOVRBondDepository is Policy {
 
         decayDebt();
         require( totalDebt <= terms.maxDebt && terms.maxDebt > 0, "Max capacity reached" );
-
-        // feees are calculated
-        uint fee = _amount.mul( terms.fee ).div( 10000 );
-        _amount = _amount.sub( fee );
-
-        if ( fee != 0 ) { // fee is transferred to warchest
-            IERC20( principle ).safeTransfer( WARCHEST, fee );
-        }
-        
         uint priceInUSD = bondPriceInUSD(); // Stored in bond info
         uint nativePrice = _bondPrice();
 
@@ -566,13 +551,13 @@ contract ROMEMOVRBondDepository is Policy {
     /* ======= AUXILLIARY ======= */
 
     /**
-     *  @notice allow anyone to send lost tokens (excluding principle or ROME) to the WARCHEST
+     *  @notice allow anyone to send lost tokens (excluding principle or ROME) to the DAO
      *  @return bool
      */
     function recoverLostToken( address _token ) external returns ( bool ) {
         require( _token != ROME );
         require( _token != principle );
-        IERC20( _token ).safeTransfer( WARCHEST, IERC20( _token ).balanceOf( address(this) ) );
+        IERC20( _token ).safeTransfer( DAO, IERC20( _token ).balanceOf( address(this) ) );
         return true;
     }
 }

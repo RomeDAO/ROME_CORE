@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.7.5;
-// pragma experimental ABIEncoderV2;
+pragma experimental ABIEncoderV2;
 
-// import "../../lib/ds-test/test.sol";
+import "../../lib/ds-test/test.sol";
 
 // interface IERC20 {
 //     function balanceOf(address acount) external returns (uint256);
@@ -102,5 +102,89 @@ pragma solidity 0.7.5;
 //         }
 
 //         assertEq(2, index);
+//     }
+
+//     function test_HevmStoreROMEMOVR() public {
+//         IHEVM hevm = IHEVM(0x7109709ECfa91a80626fF3989D68f67F5b1DD12D);
+//         IERC20 ROMEMOVR = IERC20(0x0ceE045861051f8f5FD4e62622F87556c8e555B6);
+
+//         uint256 index;
+//         for (uint256 i = 0; i < 100; i++) {
+//             hevm.store(
+//                 address( ROMEMOVR ),
+//                 keccak256(
+//                     abi.encode(
+//                         0x3a3eE61F7c6e1994a2001762250A5E17B2061b6d,
+//                         uint256(i)
+//                     )
+//                 ),
+//                 bytes32(uint256(10 * 1e6))
+//             );
+//             uint256 balance = ROMEMOVR.balanceOf(
+//                 0x3a3eE61F7c6e1994a2001762250A5E17B2061b6d
+//             );
+//             if (balance == 10 * 1e6) {
+//                 index = i;
+//                 break;
+//             }
+//         }
+
+//         assertEq(1, index);
+//     }
+
+//     function test_HevmStoreROME() public {
+//         IHEVM hevm = IHEVM(0x7109709ECfa91a80626fF3989D68f67F5b1DD12D);
+//         IERC20 ROME = IERC20(0x4a436073552044D5f2f49B176853ad3Ad473d9d6);
+
+//         uint256 index;
+//         for (uint256 i = 0; i < 100; i++) {
+//             hevm.store(
+//                 address( ROME ),
+//                 keccak256(
+//                     abi.encode(
+//                         0x3a3eE61F7c6e1994a2001762250A5E17B2061b6d,
+//                         uint256(i)
+//                     )
+//                 ),
+//                 bytes32(uint256(10 * 1e6))
+//             );
+//             uint256 balance = ROME.balanceOf(
+//                 0x3a3eE61F7c6e1994a2001762250A5E17B2061b6d
+//             );
+//             if (balance == 10 * 1e6) {
+//                 index = i;
+//                 break;
+//             }
+//         }
+
+//         assertEq(0, index);
+//     }
+
+//     function test_HevmStoreWMOVR() public {
+//         IHEVM hevm = IHEVM(0x7109709ECfa91a80626fF3989D68f67F5b1DD12D);
+//         IERC20 WMOVR = IERC20(0x98878B06940aE243284CA214f92Bb71a2b032B8A);
+
+//         uint256 index;
+//         for (uint256 i = 0; i < 100; i++) {
+//             hevm.store(
+//                 address( WMOVR ),
+//                 keccak256(
+//                     abi.encode(
+//                         0x3a3eE61F7c6e1994a2001762250A5E17B2061b6d,
+//                         uint256(i)
+//                     )
+//                 ),
+//                 bytes32(uint256(10 * 1e6))
+//             );
+//             uint256 balance = WMOVR.balanceOf(
+//                 0x3a3eE61F7c6e1994a2001762250A5E17B2061b6d
+//             );
+//             if (balance == 10 * 1e6) {
+//                 index = i;
+//                 break;
+//             }
+//         }
+
+//         assertEq(3, index);
 //     }
 // }
