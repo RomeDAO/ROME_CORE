@@ -7,6 +7,12 @@ import "../../lib/ds-test/test.sol";
 // interface IERC20 {
 //     function balanceOf(address acount) external returns (uint256);
 // }
+// interface IRomeAuthority {
+//     function vault() external view returns (address);
+// }
+// interface IVault {
+//     function totalReserves() external view returns (uint);
+// }
 
 // interface IHEVM {
 //     function store(
@@ -186,5 +192,48 @@ import "../../lib/ds-test/test.sol";
 //         }
 
 //         assertEq(3, index);
+//     }
+
+//     function test_HevmStoreVAULT() public {
+//         IHEVM hevm = IHEVM(0x7109709ECfa91a80626fF3989D68f67F5b1DD12D);
+//         IRomeAuthority AUTH = IRomeAuthority(0x59FceceC609dAB272C7302afC5F8f90bac9d771D);
+
+//         uint256 index;
+//         for (uint256 i = 0; i < 100; i++) {
+//             hevm.store(
+//                 address( AUTH ),
+//                 bytes32(i),
+//                 bytes32(uint256(0x3a3eE61F7c6e1994a2001762250A5E17B2061b6d))
+//             );
+
+//             address vault = AUTH.vault();
+//             if (vault == 0x3a3eE61F7c6e1994a2001762250A5E17B2061b6d) {
+//                 index = i;
+//                 break;
+//             }
+//         }
+
+//         assertEq(5, index);
+//     }
+
+//     function test_HevmStoreVaultReserves() public {
+//         IHEVM hevm = IHEVM(0x7109709ECfa91a80626fF3989D68f67F5b1DD12D);
+//         IVault VAULT = IVault(0xfbAD41e4Dd040BC80c89FcC6E90d152A746139aF);
+
+//         uint256 index;
+//         for (uint256 i = 0; i < 100; i++) {
+//             hevm.store(
+//                 address( VAULT ),
+//                 bytes32(i),
+//                 bytes32(uint(123*1e18))
+//             );
+//             uint256 reserves = VAULT.totalReserves();
+//             if (reserves == 123*1e18) {
+//                 index = i;
+//                 break;
+//             }
+//         }
+
+//         assertEq(33, index);
 //     }
 // }
