@@ -80,7 +80,7 @@ contract RomeMovrBondTest is DSTest {
 
     uint movrPrice;
 
-    uint numberUsers = 5;
+    uint numberUsers = 15;
 
     BondUser[] internal user;
 
@@ -160,7 +160,7 @@ contract RomeMovrBondTest is DSTest {
         emit log_named_uint("<|Rome Price USD|> ==", romePrice.div(1e17));
 
         for (uint i = 0; i < numberUsers; i++) {
-            //3. Print BondPrice in USD
+            emit log_named_uint("deposit number",i+1);
             emit log_named_uint("bond price ", BOND.bondPrice());
             emit log_named_uint("bond price in USD", BOND.bondPriceInUSD().div(1e18));
             address addr = address(user[i]);

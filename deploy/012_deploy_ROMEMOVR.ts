@@ -46,4 +46,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
 };
 export default func;
-func.tags = ['ROMEWMOVRBond'];
+func.tags = ['ROMEMOVRBond'];
